@@ -1,0 +1,163 @@
+package com.booking.booking_clone_backend.config;
+
+import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
+import com.booking.booking_clone_backend.config.filters.JwtAuthFilter;
+import com.booking.booking_clone_backend.services.MyUserDetailsService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
+
+/**
+ * Spring Security configuration:
+ * - Stateless API (no sessions)
+ * - Access token in Authorization header (Bearer ...)
+ * - Refresh token in HttpOnly cookie (/auth/*)
+ * - 401 when unauthenticated, 403 when authenticated but forbidden (wrong role)
+ */
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Autowired
+    private JwtAuthFilter jwtAuthFilter;
+
+    @Autowired
+    private MyUserDetailsService userDetailsService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Value("${app.cors.allowed-origin}")
+    private String allowedOrigin;
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(org.springframework.security.config.annotation.web.builders.HttpSecurity http)
+            throws Exception {
+
+        http
+                // No server-side sessions. Every request must carry auth (access token).
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // CORS (used by your React app with withCredentials)
+                .cors(Customizer.withDefaults())
+
+                // Disable defaults for a pure REST API
+                .csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .anonymous(AbstractHttpConfigurer::disable)
+                .exceptionHandling(ex -> ex
+                        // Not authenticated -> 401
+                        .authenticationEntryPoint((req, res, e) -> {
+                            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            res.setContentType("application/json");
+                            res.getWriter().write(objectMapper.writeValueAsString(
+                                    new GenericResponse<>(null, "UNAUTHORIZED", false)
+                            ));
+                        })
+                        // Authenticated but forbidden -> 403
+                        .accessDeniedHandler((req, res, e) -> {
+                            res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            res.setContentType("application/json");
+                            res.getWriter().write(objectMapper.writeValueAsString(
+                                    new GenericResponse<>(null, "FORBIDDEN", false)
+                            ));
+                        })
+                )
+
+                .authorizeHttpRequests(auth -> auth
+                        // Let Spring's error dispatch happen without security interference
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                        .requestMatchers("/error").permitAll()
+
+                        // CORS preflight
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Auth endpoints are public (refresh uses cookie)
+                        .requestMatchers("/auth/**").permitAll()
+
+                        // Partner area requires PARTNER role
+                        .requestMatchers("/partner/**").hasRole("PARTNER")
+
+                        // Everything else requires being authenticated
+                        .anyRequest().authenticated()
+                )
+
+                // Email/password auth provider for /auth/login
+                .authenticationProvider(authenticationProvider())
+
+                // Validate access JWT on every request
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    /**
+     * Authentication provider for username/password login.
+     */
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    /**
+     * Password encoder used when registering + validating login.
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(12);
+    }
+
+    /**
+     * AuthenticationManager needed to call authManager.authenticate(...) in AuthService.
+     */
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    /**
+     * CORS config:
+     * - allow your SPA origin
+     * - allow credentials (refresh cookie)
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration cfg = new CorsConfiguration();
+
+        // If you ever want wildcard patterns, use setAllowedOriginPatterns instead.
+        cfg.setAllowedOrigins(List.of(allowedOrigin));
+
+        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        cfg.setAllowedHeaders(List.of("*"));
+        cfg.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", cfg);
+        return source;
+    }
+}
