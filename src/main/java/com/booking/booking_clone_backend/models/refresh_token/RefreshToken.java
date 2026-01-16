@@ -20,7 +20,7 @@ import java.time.Instant;
 public class RefreshToken {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private long id;
 

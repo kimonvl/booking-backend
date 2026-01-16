@@ -30,7 +30,7 @@ public class Amenity {
     @Column(nullable = false, length = 160)
     private String label;
 
-    // e.g. "General", "Cooking and cleaning"
-    @Column(nullable = false, length = 120)
-    private String groupName;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "group_name", nullable = false, length = 64)
+    private AmenityGroup groupName;
 }
