@@ -227,10 +227,3 @@ CREATE TABLE IF NOT EXISTS property_availability (
 CREATE INDEX IF NOT EXISTS idx_availability_property ON property_availability(property_id);
 CREATE INDEX IF NOT EXISTS idx_availability_dates    ON property_availability(start_date, end_date);
 
--- No-overlap constraint (per property)
-ALTER TABLE property_availability
-    ADD CONSTRAINT no_overlap_property_availability
-    EXCLUDE USING gist (
-        property_id WITH =,
-        daterange(start_date, end_date, '[)') WITH &&
-    );

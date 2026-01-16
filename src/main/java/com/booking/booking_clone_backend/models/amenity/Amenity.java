@@ -2,6 +2,8 @@ package com.booking.booking_clone_backend.models.amenity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Getter
@@ -31,6 +33,7 @@ public class Amenity {
     private String label;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "group_name", nullable = false, length = 64)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name="group_name", columnDefinition="amenity_group_enum", nullable=false)
     private AmenityGroup groupName;
 }
