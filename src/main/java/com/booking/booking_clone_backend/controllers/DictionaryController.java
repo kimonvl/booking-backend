@@ -4,6 +4,7 @@ import com.booking.booking_clone_backend.DTOs.requests.auth.RegisterRequest;
 import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
 import com.booking.booking_clone_backend.DTOs.responses.UserDTO;
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.amenity.AmenitiesDictionaryItemDTO;
+import com.booking.booking_clone_backend.DTOs.responses.dictionaries.language.LanguageDTO;
 import com.booking.booking_clone_backend.constants.MessageConstants;
 import com.booking.booking_clone_backend.controllers.controller_utils.ResponseFactory;
 import com.booking.booking_clone_backend.services.DictionaryService;
@@ -27,6 +28,15 @@ public class DictionaryController {
         return ResponseFactory.createSuccessResponse(
                 dictionaryService.getAmenitiesDictionary(),
                 MessageConstants.AMENITIES_DICTIONARY_FETCHED,
+                HttpStatus.ACCEPTED
+        );
+    }
+
+    @GetMapping("/getLanguages")
+    public ResponseEntity<@NonNull GenericResponse<List<LanguageDTO>>> getLanguageDictionary(HttpServletResponse response) {
+        return ResponseFactory.createSuccessResponse(
+                dictionaryService.getLanguageDictionary(),
+                MessageConstants.LANGUAGE_DICTIONARY_FETCHED,
                 HttpStatus.ACCEPTED
         );
     }

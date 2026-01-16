@@ -1,12 +1,15 @@
 package com.booking.booking_clone_backend.mappers;
 
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.amenity.AmenityDTO;
+import com.booking.booking_clone_backend.DTOs.responses.dictionaries.language.LanguageDTO;
 import com.booking.booking_clone_backend.models.amenity.Amenity;
+import com.booking.booking_clone_backend.models.language.Language;
 import org.mapstruct.Mapper;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = {DictionaryMapper.class})
+@Mapper(componentModel = "spring")
 public interface DictionaryMapper {
     List<AmenityDTO> amenitiesToDtoList(List<Amenity> amenities);
+    List<LanguageDTO> languagesToDtoList(List<Language> languages);
 }

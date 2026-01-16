@@ -2,10 +2,13 @@ package com.booking.booking_clone_backend.services;
 
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.amenity.AmenitiesDictionaryItemDTO;
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.amenity.AmenityDTO;
+import com.booking.booking_clone_backend.DTOs.responses.dictionaries.language.LanguageDTO;
 import com.booking.booking_clone_backend.mappers.DictionaryMapper;
 import com.booking.booking_clone_backend.models.amenity.Amenity;
 import com.booking.booking_clone_backend.models.amenity.AmenityGroup;
+import com.booking.booking_clone_backend.models.language.Language;
 import com.booking.booking_clone_backend.repos.AmenitiesRepo;
+import com.booking.booking_clone_backend.repos.LanguageRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,8 @@ import java.util.List;
 public class DictionaryServiceImpl implements DictionaryService{
     @Autowired
     AmenitiesRepo amenitiesRepo;
+    @Autowired
+    LanguageRepo languageRepo;
     @Autowired
     DictionaryMapper dictionaryMapper;
 
@@ -30,5 +35,11 @@ public class DictionaryServiceImpl implements DictionaryService{
         }
 
         return result;
+    }
+
+    @Override
+    public List<LanguageDTO> getLanguageDictionary() {
+        List<Language> languages = languageRepo.findAll();
+        return dictionaryMapper.languagesToDtoList(languages);
     }
 }

@@ -43,4 +43,5 @@ public class MessageConstants {
     public static final String INVALID_REFRESH_TOKEN = "Invalid refresh token";
     public static final String TOKEN_REFRESHED = "Token refreshed successfully";
     public static final String AMENITIES_DICTIONARY_FETCHED = "Amenities dictionary fetched successfully";
+    public static final String LANGUAGE_DICTIONARY_FETCHED = "Language dictionary fetched successfully";
 }
