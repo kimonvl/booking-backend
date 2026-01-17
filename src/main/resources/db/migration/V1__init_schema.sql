@@ -117,24 +117,57 @@ CREATE INDEX IF NOT EXISTS idx_properties_status ON properties(status);
 CREATE INDEX IF NOT EXISTS idx_properties_type   ON properties(type);
 
 -- ---------- PROPERTY ADDRESSES (1:1, PK = FK) ----------
-CREATE TABLE IF NOT EXISTS property_addresses (
-    property_id    BIGINT PRIMARY KEY,
-    country        VARCHAR(120) NOT NULL,
-    city           VARCHAR(120) NOT NULL,
-    postcode       VARCHAR(32),
-    street         VARCHAR(200) NOT NULL,
-    street_number  VARCHAR(32),
-    lat            DOUBLE PRECISION,
-    lng            DOUBLE PRECISION,
 
-    CONSTRAINT fk_property_addresses_property
-        FOREIGN KEY (property_id) REFERENCES properties(id)
-        ON DELETE CASCADE
+-- =========================
+-- Countries dictionary
+-- =========================
+CREATE TABLE countries (
+    code VARCHAR(2) PRIMARY KEY,
+    name VARCHAR(120) NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_property_addresses_city     ON property_addresses(city);
-CREATE INDEX IF NOT EXISTS idx_property_addresses_country  ON property_addresses(country);
-CREATE INDEX IF NOT EXISTS idx_property_addresses_postcode ON property_addresses(postcode);
+INSERT INTO countries (code, name) VALUES
+('GR', 'Greece'),
+('FR', 'France'),
+('DE', 'Germany'),
+('IT', 'Italy'),
+('ES', 'Spain'),
+('GB', 'United Kingdom'),
+('US', 'United States'),
+('NL', 'Netherlands'),
+('BE', 'Belgium'),
+('PT', 'Portugal'),
+('AT', 'Austria'),
+('CH', 'Switzerland'),
+('SE', 'Sweden'),
+('NO', 'Norway');
+
+-- =========================
+-- Property addresses
+-- =========================
+CREATE TABLE IF NOT EXISTS property_addresses (
+    property_id BIGINT PRIMARY KEY,
+    country_code VARCHAR(2) NOT NULL,
+    city VARCHAR(120) NOT NULL,
+    postcode VARCHAR(32),
+    street VARCHAR(200) NOT NULL,
+    street_number VARCHAR(32),
+    lat DOUBLE PRECISION,
+    lng DOUBLE PRECISION,
+
+    CONSTRAINT fk_property_addresses_property
+        FOREIGN KEY (property_id)
+        REFERENCES properties(id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_property_addresses_country
+        FOREIGN KEY (country_code)
+        REFERENCES countries(code)
+);
+
+CREATE INDEX idx_property_addresses_city ON property_addresses(city);
+CREATE INDEX idx_property_addresses_country ON property_addresses(country_code);
+CREATE INDEX idx_property_addresses_postcode ON property_addresses(postcode);
 
 -- ---------- PROPERTY PHOTOS ----------
 CREATE TABLE IF NOT EXISTS property_photos (

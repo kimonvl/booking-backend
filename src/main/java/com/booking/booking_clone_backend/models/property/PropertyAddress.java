@@ -13,7 +13,7 @@ import lombok.*;
         name = "property_addresses",
         indexes = {
                 @Index(name = "idx_property_addresses_city", columnList = "city"),
-                @Index(name = "idx_property_addresses_country", columnList = "country"),
+                @Index(name = "idx_property_addresses_country", columnList = "country_code"), // ✅ matches SQL
                 @Index(name = "idx_property_addresses_postcode", columnList = "postcode")
         }
 )
@@ -21,6 +21,7 @@ public class PropertyAddress {
 
     @Id
     @EqualsAndHashCode.Include
+    @Column(name = "property_id")
     private long propertyId;
 
     @MapsId
@@ -28,8 +29,10 @@ public class PropertyAddress {
     @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
-    @Column(nullable = false, length = 120)
-    private String country;
+    // FK property_addresses.country_code -> countries.code
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "country_code", referencedColumnName = "code", nullable = false)
+    private Country country;
 
     @Column(nullable = false, length = 120)
     private String city;
@@ -40,10 +43,9 @@ public class PropertyAddress {
     @Column(nullable = false, length = 200)
     private String street;
 
-    @Column(length = 32)
+    @Column(name = "street_number", length = 32)
     private String streetNumber;
 
-    // Future map/geocoding
     private Double lat;
     private Double lng;
 }

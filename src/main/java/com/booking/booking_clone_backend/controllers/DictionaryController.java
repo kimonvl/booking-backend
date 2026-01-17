@@ -1,9 +1,8 @@
 package com.booking.booking_clone_backend.controllers;
 
-import com.booking.booking_clone_backend.DTOs.requests.auth.RegisterRequest;
 import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
-import com.booking.booking_clone_backend.DTOs.responses.UserDTO;
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.amenity.AmenitiesDictionaryItemDTO;
+import com.booking.booking_clone_backend.DTOs.responses.dictionaries.country.CountryDTO;
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.language.LanguageDTO;
 import com.booking.booking_clone_backend.constants.MessageConstants;
 import com.booking.booking_clone_backend.controllers.controller_utils.ResponseFactory;
@@ -37,6 +36,15 @@ public class DictionaryController {
         return ResponseFactory.createSuccessResponse(
                 dictionaryService.getLanguageDictionary(),
                 MessageConstants.LANGUAGE_DICTIONARY_FETCHED,
+                HttpStatus.ACCEPTED
+        );
+    }
+
+    @GetMapping("/getCountries")
+    public ResponseEntity<@NonNull GenericResponse<List<CountryDTO>>> getCountryDictionary(HttpServletResponse response) {
+        return ResponseFactory.createSuccessResponse(
+                dictionaryService.getCountryDictionary(),
+                MessageConstants.COUNTRY_DICTIONARY_FETCHED,
                 HttpStatus.ACCEPTED
         );
     }
