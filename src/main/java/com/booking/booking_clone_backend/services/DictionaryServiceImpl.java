@@ -31,7 +31,7 @@ public class DictionaryServiceImpl implements DictionaryService{
         for(AmenityGroup group : AmenityGroup.values()){
             List<Amenity> amenities = amenitiesRepo.findByGroupName(group);
             List<AmenityDTO> amenityDTOs = dictionaryMapper.amenitiesToDtoList(amenities);
-            result.add(new AmenitiesDictionaryItemDTO(group.name(), amenityDTOs));
+            result.add(new AmenitiesDictionaryItemDTO(group.name(), group.getLabel(), amenityDTOs));
         }
 
         return result;
