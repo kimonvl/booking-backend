@@ -3,7 +3,7 @@ package com.booking.booking_clone_backend.controllers;
 import com.booking.booking_clone_backend.DTOs.requests.auth.LoginRequest;
 import com.booking.booking_clone_backend.DTOs.requests.auth.RegisterRequest;
 import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
-import com.booking.booking_clone_backend.DTOs.responses.UserDTO;
+import com.booking.booking_clone_backend.DTOs.responses.user.UserDTO;
 import com.booking.booking_clone_backend.DTOs.responses.auth.AuthResponse;
 import com.booking.booking_clone_backend.constants.MessageConstants;
 import com.booking.booking_clone_backend.controllers.controller_utils.ResponseFactory;

@@ -45,4 +45,5 @@ public class MessageConstants {
     public static final String AMENITIES_DICTIONARY_FETCHED = "Amenities dictionary fetched successfully";
     public static final String LANGUAGE_DICTIONARY_FETCHED = "Language dictionary fetched successfully";
     public static final String COUNTRY_DICTIONARY_FETCHED = "Country dictionary fetched successfully";
+    public static final String INVALID_COUNTRY_CODE = "Invalid country code";
 }

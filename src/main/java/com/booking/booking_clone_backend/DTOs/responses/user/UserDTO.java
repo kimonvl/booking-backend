@@ -1,4 +1,4 @@
-package com.booking.booking_clone_backend.DTOs.responses;
+package com.booking.booking_clone_backend.DTOs.responses.user;
 
 import com.booking.booking_clone_backend.models.user.Role;
 import com.booking.booking_clone_backend.models.user.User;

@@ -102,6 +102,9 @@ CREATE TABLE IF NOT EXISTS properties (
     check_out_from     TIME,
     check_out_until    TIME,
 
+
+    bedroom_count      INTEGER NOT NULL DEFAULT 0,
+    bed_count          INTEGER NOT NULL DEFAULT 0,
     sleeping_areas_json JSONB,
 
     created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),

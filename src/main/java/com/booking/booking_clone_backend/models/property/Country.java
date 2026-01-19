@@ -17,7 +17,7 @@ public class Country {
 
     @Id
     @EqualsAndHashCode.Include
-    @Column(length = 2)
+    @Column(length = 2, unique = true)
     private String code; // e.g. "GR"
 
     @Column(nullable = false, length = 120)

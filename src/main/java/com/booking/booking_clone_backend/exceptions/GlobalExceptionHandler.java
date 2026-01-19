@@ -64,4 +64,15 @@ public class GlobalExceptionHandler {
     ResponseEntity<@NonNull GenericResponse<?>> handleInvalidAccessToken(InvalidRefreshTokenException exception){
         return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.UNAUTHORIZED);
     }
+
+    /**
+     * Handles cases where invalid country code is given from frontend.
+     *
+     * @param exception the thrown {@link InvalidCountryCodeException}
+     * @return a response with a message indicating the authorization failure
+     * */
+    @ExceptionHandler(InvalidCountryCodeException.class)
+    ResponseEntity<@NonNull GenericResponse<?>> handleInvalidCountryCode(InvalidCountryCodeException exception){
+        return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.UNAUTHORIZED);
+    }
 }

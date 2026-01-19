@@ -1,7 +1,7 @@
 package com.booking.booking_clone_backend.mappers;
 
 import com.booking.booking_clone_backend.models.user.User;
-import com.booking.booking_clone_backend.DTOs.responses.UserDTO;
+import com.booking.booking_clone_backend.DTOs.responses.user.UserDTO;
 import org.mapstruct.Mapper;
 
 import java.util.List;

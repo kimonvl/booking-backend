@@ -9,4 +9,5 @@ import java.util.List;
 
 public interface AmenitiesRepo extends JpaRepository<@NonNull Amenity, @NonNull Long> {
     List<Amenity> findByGroupName(AmenityGroup groupName);
+    List<Amenity> findByCodeIn(List<String> codes);
 }

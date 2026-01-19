@@ -1,2 +1,4 @@
-implement amenities dictionary in java with 1 db call
-add country dictionary for address screen in front end
+create apartment request:
+    upload photo with cloudinary service
+    save photoProperty add url and publicId
+    save public id as a main photo or entity photo to come handy on returning list of properties with main photo
