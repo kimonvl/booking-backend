@@ -7,6 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-public interface ApartmentService {
+public interface PartnerApartmentService {
     Property addApartment(CreateApartmentRequest request, List<MultipartFile> photos, Integer mainIndex, User user);
 }

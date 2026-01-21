@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ApartmentServiceImpl implements ApartmentService{
+public class PartnerApartmentServiceImpl implements PartnerApartmentService {
     @Autowired
     CloudinaryService cloudinaryService;
     @Autowired

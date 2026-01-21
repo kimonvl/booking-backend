@@ -4,7 +4,7 @@ import com.booking.booking_clone_backend.DTOs.requests.apartment.CreateApartment
 import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
 import com.booking.booking_clone_backend.models.property.Property;
 import com.booking.booking_clone_backend.models.user.UserPrincipal;
-import com.booking.booking_clone_backend.services.ApartmentService;
+import com.booking.booking_clone_backend.services.PartnerApartmentService;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -17,9 +17,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/partner/apartment")
-public class ApartmentController {
+public class PartnerApartmentController {
     @Autowired
-    private ApartmentService apartmentService;
+    private PartnerApartmentService apartmentService;
 
     @PostMapping(value = "/addApartment", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<@NonNull GenericResponse<Property>> addApartment(

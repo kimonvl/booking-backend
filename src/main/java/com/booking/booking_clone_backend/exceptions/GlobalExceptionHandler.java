@@ -69,10 +69,21 @@ public class GlobalExceptionHandler {
      * Handles cases where invalid country code is given from frontend.
      *
      * @param exception the thrown {@link InvalidCountryCodeException}
-     * @return a response with a message indicating the authorization failure
+     * @return a response with a message indicating the invalid country code given
      * */
     @ExceptionHandler(InvalidCountryCodeException.class)
     ResponseEntity<@NonNull GenericResponse<?>> handleInvalidCountryCode(InvalidCountryCodeException exception){
+        return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.UNAUTHORIZED);
+    }
+
+    /**
+     * Handles cases where username doesn't match a registered user.
+     *
+     * @param exception the thrown {@link UserNotFoundException}
+     * @return a response with a message indicating the authentication failure
+     * */
+    @ExceptionHandler(UserNotFoundException.class)
+    ResponseEntity<@NonNull GenericResponse<?>> handleUserNotFound(UserNotFoundException exception){
         return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.UNAUTHORIZED);
     }
 }

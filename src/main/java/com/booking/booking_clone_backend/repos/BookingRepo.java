@@ -1,0 +1,99 @@
+package com.booking.booking_clone_backend.repos;
+
+import com.booking.booking_clone_backend.models.booking.Booking;
+import com.booking.booking_clone_backend.models.booking.BookingStatus;
+import org.jspecify.annotations.NonNull;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+
+public interface BookingRepo extends JpaRepository<@NonNull Booking, @NonNull Long> {
+    interface PropertyCountRow {
+        Long getPropertyId();
+        Long getCount();
+    }
+
+    @Query("""
+    select b.property.id as propertyId, count(b) as count
+    from Booking b
+    where b.property.owner.id = :ownerId
+      and b.status = :status
+      and b.checkInDate >= :from
+      and b.checkInDate <= :to
+    group by b.property.id
+    """)
+    List<PropertyCountRow> countArrivalsByProperty(
+            @Param("ownerId") long ownerId,
+            @Param("status") BookingStatus status,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to
+    );
+
+    @Query("""
+    select b.property.id as propertyId, count(b) as count
+    from Booking b
+    where b.property.owner.id = :ownerId
+      and b.status = :status
+      and b.checkOutDate >= :from
+      and b.checkOutDate <= :to
+    group by b.property.id
+    """)
+    List<PropertyCountRow> countDeparturesByProperty(
+            @Param("ownerId") long ownerId,
+            @Param("status") BookingStatus status,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to
+    );
+
+    // -------- Reservations (bookings created in window) --------
+    @Query("""
+    select count(b)
+    from Booking b
+    where b.property.owner.id = :ownerId
+      and b.status = :status
+      and b.createdAt >= :from
+      and b.createdAt < :to
+    """)
+    long countReservationsCreatedBetween(
+            @Param("ownerId") long ownerId,
+            @Param("status") BookingStatus status,
+            @Param("from") Instant from,
+            @Param("to") Instant to
+    );
+
+    // -------- Arrivals (check-ins in date window) --------
+    @Query("""
+    select count(b)
+    from Booking b
+    where b.property.owner.id = :ownerId
+      and b.status = :status
+      and b.checkInDate >= :from
+      and b.checkInDate <= :to
+    """)
+    long countArrivalsBetween(
+            @Param("ownerId") long ownerId,
+            @Param("status") BookingStatus status,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to
+    );
+
+    // -------- Departures (check-outs in date window) --------
+    @Query("""
+    select count(b)
+    from Booking b
+    where b.property.owner.id = :ownerId
+      and b.status = :status
+      and b.checkOutDate >= :from
+      and b.checkOutDate <= :to
+    """)
+    long countDeparturesBetween(
+            @Param("ownerId") long ownerId,
+            @Param("status") BookingStatus status,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to
+    );
+}

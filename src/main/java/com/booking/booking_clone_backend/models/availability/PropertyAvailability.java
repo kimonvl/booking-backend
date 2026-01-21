@@ -17,7 +17,7 @@ import java.time.LocalDate;
         name = "property_availability",
         indexes = {
                 @Index(name = "idx_availability_property", columnList = "property_id"),
-                @Index(name = "idx_availability_dates", columnList = "startDate, endDate")
+                @Index(name = "idx_availability_dates", columnList = "start_date, end_date")
         }
 )
 public class PropertyAvailability {
