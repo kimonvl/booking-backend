@@ -124,6 +124,15 @@ public class Property {
     @Column(nullable = false)
     private int bedCount;
 
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PropertyPhoto> propertyPhotos = new HashSet<>();
+
+    @Column(name = "main_photo_id")
+    private Long mainPhotoId;
+
+    @Column(name = "main_photo_url")
+    private String mainPhotoUrl;
+
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 

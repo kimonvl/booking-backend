@@ -18,6 +18,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -25,6 +26,8 @@ import java.util.Optional;
 
 @Service
 public class ApartmentServiceImpl implements ApartmentService{
+    @Autowired
+    CloudinaryService cloudinaryService;
     @Autowired
     private PropertyRepo propertyRepo;
     @Autowired
@@ -37,7 +40,7 @@ public class ApartmentServiceImpl implements ApartmentService{
     ObjectMapper objectMapper;
 
     @Override
-    public Property addApartment(CreateApartmentRequest request, User user) {
+    public Property addApartment(CreateApartmentRequest request, List<MultipartFile> photos, Integer mainIndex, User user) {
         Property property = new Property();
         property.setOwner(user);
         property.setType(PropertyType.APARTMENT);
@@ -113,6 +116,18 @@ public class ApartmentServiceImpl implements ApartmentService{
         }
 
         //Upload photos to cloudinary
+        String folder = "booking/properties/" + savedProperty.getId();
+        for (int i = 0; i < photos.size(); i++) {
+            //implement main photo later
+            CloudinaryService.UploadResult res = cloudinaryService.uploadImage(photos.get(i), folder, "photo_" + i);
+            PropertyPhoto pp = new PropertyPhoto();
+            pp.setProperty(savedProperty);
+            pp.setUrl(res.url());
+            pp.setPublicId(res.publicId());
+
+            savedProperty.getPropertyPhotos().add(pp);
+
+        }
 
         return propertyRepo.save(savedProperty);
     }

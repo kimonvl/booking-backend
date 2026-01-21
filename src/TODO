@@ -1,4 +1,2 @@
 create apartment request:
-    upload photo with cloudinary service
-    save photoProperty add url and publicId
     save public id as a main photo or entity photo to come handy on returning list of properties with main photo

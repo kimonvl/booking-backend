@@ -32,6 +32,9 @@ public class PropertyPhoto {
     @Column(nullable = false, length = 600)
     private String url;
 
+    @Column(nullable = false, length = 600)
+    private String publicId;
+
     @Column(nullable = false)
     private int sortOrder = 0;
 

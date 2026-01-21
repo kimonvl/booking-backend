@@ -29,6 +29,7 @@ public class ApartmentController {
             @AuthenticationPrincipal UserPrincipal principal
             ) throws Exception {
 
+        apartmentService.addApartment(req, photos, Integer.valueOf(mainIndex), principal.user());
         return ResponseEntity.ok(new GenericResponse<>(null, "OK", true));
     }
 }
