@@ -120,9 +120,13 @@ public class Property {
     @Column(name = "sleeping_areas_json", columnDefinition = "jsonb")
     private String sleepingAreasJson;
     @Column(nullable = false)
+    private int livingRoomCount;
+    @Column(nullable = false)
     private int bedroomCount;
     @Column(nullable = false)
     private int bedCount;
+    @Column(nullable = false)
+    private String bedSummary;
 
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PropertyPhoto> propertyPhotos = new HashSet<>();

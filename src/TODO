@@ -1,2 +1,4 @@
 create apartment request:
-    save public id as a main photo or entity photo to come handy on returning list of properties with main photo
+    fix main photo id issue
+    fix the bedSummary string
+fetch properties short card

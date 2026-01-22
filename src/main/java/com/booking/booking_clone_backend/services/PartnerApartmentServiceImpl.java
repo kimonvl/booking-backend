@@ -1,5 +1,6 @@
 package com.booking.booking_clone_backend.services;
 
+import com.booking.booking_clone_backend.DTOs.requests.apartment.BedType;
 import com.booking.booking_clone_backend.DTOs.requests.apartment.BedroomDTO;
 import com.booking.booking_clone_backend.DTOs.requests.apartment.CreateApartmentRequest;
 import com.booking.booking_clone_backend.constants.MessageConstants;
@@ -21,7 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -40,7 +43,7 @@ public class PartnerApartmentServiceImpl implements PartnerApartmentService {
     ObjectMapper objectMapper;
 
     @Override
-    public Property addApartment(CreateApartmentRequest request, List<MultipartFile> photos, Integer mainIndex, User user) {
+    public void addApartment(CreateApartmentRequest request, List<MultipartFile> photos, Integer mainIndex, User user) {
         Property property = new Property();
         property.setOwner(user);
         property.setType(PropertyType.APARTMENT);
@@ -61,27 +64,49 @@ public class PartnerApartmentServiceImpl implements PartnerApartmentService {
         property.setCheckInUntil(LocalTime.parse(request.checkInUntil()));
         property.setCheckOutFrom(LocalTime.parse(request.checkOutFrom()));
         property.setCheckOutUntil(LocalTime.parse(request.checkOutUntil()));
+        property.setBathrooms(request.bathroomCount());
         try {
             property.setSleepingAreasJson(objectMapper.writeValueAsString(request.sleepingAreas()));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        property.setBedroomCount(request.sleepingAreas().bedrooms().size());
 
+        //Bedroom and Living room beds
         Integer bedCount = 0;
+        int livingRoomCount = 0;
+        Map<BedType, Integer> totalBeds = new HashMap<>();
         for (BedroomDTO bedroom : request.sleepingAreas().bedrooms()) {
             if (bedroom != null) {
-                for (Integer count : bedroom.beds().values()) {
-                    bedCount += count;
+                for (Map.Entry<BedType, Integer> entry : bedroom.beds().entrySet()) {
+                    bedCount += entry.getValue();
+                    totalBeds.compute(
+                            entry.getKey(),
+                            (key, value) -> value == null ? entry.getValue() : value + entry.getValue()
+                    );
                 }
             }
         }
         if (request.sleepingAreas().livingRoom() != null) {
-            for (Integer count : request.sleepingAreas().livingRoom().beds().values()) {
-                bedCount += count;
+            livingRoomCount += 1;
+            for (Map.Entry<BedType, Integer> entry : request.sleepingAreas().livingRoom().beds().entrySet()) {
+                bedCount += entry.getValue();
+                totalBeds.compute(
+                        entry.getKey(),
+                        (key, value) -> value == null ? entry.getValue() : value + entry.getValue()
+                );
             }
         }
+        StringBuilder bedSummary = new StringBuilder(bedCount + " beds (");
+        for (Map.Entry<BedType, Integer> entry : totalBeds.entrySet()) {
+            if (entry.getValue() > 0)
+                bedSummary.append(entry.getValue()).append(" ").append(entry.getKey().name()).append(", ");
+        }
+        bedSummary.delete(bedSummary.length()-2, bedSummary.length()-1);
+        bedSummary.append(")");
+        property.setLivingRoomCount(livingRoomCount);
+        property.setBedroomCount(request.sleepingAreas().bedrooms().size());
         property.setBedCount(bedCount);
+        property.setBedSummary(bedSummary.toString());
 
         Property savedProperty = propertyRepo.save(property);
 
@@ -126,10 +151,13 @@ public class PartnerApartmentServiceImpl implements PartnerApartmentService {
             pp.setPublicId(res.publicId());
 
             savedProperty.getPropertyPhotos().add(pp);
-
+            if (mainIndex == i) {
+                // fix mainPhotoId
+                savedProperty.setMainPhotoUrl(res.url());
+            }
         }
 
-        return propertyRepo.save(savedProperty);
+        propertyRepo.save(savedProperty);
     }
 
     private static PropertyAddress getPropertyAddress(CreateApartmentRequest request, Country country, Property savedProperty) {
