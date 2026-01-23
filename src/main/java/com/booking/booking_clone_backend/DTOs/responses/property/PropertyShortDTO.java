@@ -12,20 +12,19 @@ import java.util.Set;
 
 public record PropertyShortDTO(
         long id,
-        UserDTO owner,
         Set<AmenityDTO> propertyAmenities,
-        Set<LanguageDTO> propertyLanguages,
         AddressDTO address,
         PropertyType type,
         PropertyStatus status,
         String name,
         BigDecimal pricePerNight,
         CurrencyCode currency,
+        BigDecimal sizeSqm,
         Integer maxGuests,
         Integer bathrooms,
-        BigDecimal sizeSqm,
-        boolean childrenAllowed,
-        boolean cotsOffered,
-        String mainPhotoId
+        Integer livingRoomCount,
+        Integer bedroomCount,
+        String bedSummary,
+        String mainPhotoUrl
 ) {
 }

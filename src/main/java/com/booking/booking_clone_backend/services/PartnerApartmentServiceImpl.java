@@ -101,7 +101,7 @@ public class PartnerApartmentServiceImpl implements PartnerApartmentService {
             if (entry.getValue() > 0)
                 bedSummary.append(entry.getValue()).append(" ").append(entry.getKey().name()).append(", ");
         }
-        bedSummary.delete(bedSummary.length()-2, bedSummary.length()-1);
+        bedSummary.delete(bedSummary.length()-2, bedSummary.length());
         bedSummary.append(")");
         property.setLivingRoomCount(livingRoomCount);
         property.setBedroomCount(request.sleepingAreas().bedrooms().size());
