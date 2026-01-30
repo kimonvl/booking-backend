@@ -1,3 +1,8 @@
 create apartment request:
     fix main photo id issue
-fetch properties short card
+filtered search:
+    add adult, children, bedroom counter in searchbar in header
+    make search bar in header set destination guest count (adult + children) and check in check out dates in one redux action
+
+refactor:
+    appropriate getters and setters of collections in models like cf9

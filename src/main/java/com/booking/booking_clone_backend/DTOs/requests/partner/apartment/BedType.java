@@ -1,4 +1,4 @@
-package com.booking.booking_clone_backend.DTOs.requests.apartment;
+package com.booking.booking_clone_backend.DTOs.requests.partner.apartment;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

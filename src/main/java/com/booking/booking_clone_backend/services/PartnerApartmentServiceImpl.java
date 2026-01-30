@@ -1,8 +1,8 @@
 package com.booking.booking_clone_backend.services;
 
-import com.booking.booking_clone_backend.DTOs.requests.apartment.BedType;
-import com.booking.booking_clone_backend.DTOs.requests.apartment.BedroomDTO;
-import com.booking.booking_clone_backend.DTOs.requests.apartment.CreateApartmentRequest;
+import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.BedType;
+import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.BedroomDTO;
+import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.CreateApartmentRequest;
 import com.booking.booking_clone_backend.constants.MessageConstants;
 import com.booking.booking_clone_backend.exceptions.InvalidCountryCodeException;
 import com.booking.booking_clone_backend.models.amenity.Amenity;

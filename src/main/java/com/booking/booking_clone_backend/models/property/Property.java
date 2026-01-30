@@ -82,14 +82,14 @@ public class Property {
     private BigDecimal sizeSqm;
 
     @Column(nullable = false)
-    private boolean childrenAllowed = true;
+    private Boolean childrenAllowed = true;
 
     @Column(nullable = false)
-    private boolean cotsOffered = false;
+    private Boolean cotsOffered = false;
 
     // Services
     @Column(nullable = false)
-    private boolean breakfastServed = false;
+    private Boolean breakfastServed = false;
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
@@ -98,10 +98,10 @@ public class Property {
 
     // Rules
     @Column(nullable = false)
-    private boolean smokingAllowed = false;
+    private Boolean smokingAllowed = false;
 
     @Column(nullable = false)
-    private boolean partiesAllowed = false;
+    private Boolean partiesAllowed = false;
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
@@ -120,11 +120,11 @@ public class Property {
     @Column(name = "sleeping_areas_json", columnDefinition = "jsonb")
     private String sleepingAreasJson;
     @Column(nullable = false)
-    private int livingRoomCount;
+    private Integer livingRoomCount;
     @Column(nullable = false)
-    private int bedroomCount;
+    private Integer bedroomCount;
     @Column(nullable = false)
-    private int bedCount;
+    private Integer bedCount;
     @Column(nullable = false)
     private String bedSummary;
 

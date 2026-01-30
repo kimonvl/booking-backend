@@ -44,6 +44,27 @@ public class PropertyCustomMapper {
         return result;
     }
 
+    public PropertyShortDTO propertyToPropertyShortDTO(Property property) {
+
+        return new PropertyShortDTO(
+                property.getId(),
+                propertyAmenitiesToAmenityDTO(property.getPropertyAmenities()),
+                addressMapper.toDto(property.getAddress()),
+                property.getType(),
+                property.getStatus(),
+                property.getName(),
+                property.getPricePerNight(),
+                property.getCurrency(),
+                property.getSizeSqm(),
+                property.getMaxGuests(),
+                property.getBathrooms(),
+                property.getLivingRoomCount(),
+                property.getBedroomCount(),
+                property.getBedSummary(),
+                property.getMainPhotoUrl()
+        );
+    }
+
     private Set<AmenityDTO> propertyAmenitiesToAmenityDTO(Set<PropertyAmenity> propertyAmenities) {
         Set<AmenityDTO> amenityDTOs = new HashSet<>();
         for (PropertyAmenity pa : propertyAmenities) {

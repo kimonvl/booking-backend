@@ -1,4 +1,4 @@
-package com.booking.booking_clone_backend.DTOs.requests.apartment;
+package com.booking.booking_clone_backend.DTOs.requests.partner.apartment;
 
 import java.util.List;
 
