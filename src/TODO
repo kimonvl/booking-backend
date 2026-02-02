@@ -4,6 +4,7 @@ fix:
     post code goes undefined
 send property Details:
 
+register with details similar to booking checkout
 
 refactor:
     appropriate getters and setters of collections in models like cf9

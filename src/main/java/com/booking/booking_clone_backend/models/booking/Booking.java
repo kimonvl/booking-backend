@@ -54,6 +54,10 @@ public class Booking {
     @Column(name = "status", columnDefinition = "booking_status_enum", nullable = false)
     private BookingStatus status = BookingStatus.CONFIRMED;
 
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private BookingCheckoutDetails checkoutDetails;
+
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt = Instant.now();
 
