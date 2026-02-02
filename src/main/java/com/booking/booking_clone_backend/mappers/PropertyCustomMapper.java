@@ -1,13 +1,15 @@
 package com.booking.booking_clone_backend.mappers;
 
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.amenity.AmenityDTO;
+import com.booking.booking_clone_backend.DTOs.responses.property.PropertyDetailsDTO;
 import com.booking.booking_clone_backend.DTOs.responses.property.PropertyShortDTO;
+import com.booking.booking_clone_backend.DTOs.responses.review.ReviewSummaryDTO;
 import com.booking.booking_clone_backend.models.amenity.PropertyAmenity;
 import com.booking.booking_clone_backend.models.property.Property;
+import com.booking.booking_clone_backend.models.property.PropertyPhoto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -19,32 +21,7 @@ public class PropertyCustomMapper {
     @Autowired
     AddressMapper addressMapper;
 
-    public List<PropertyShortDTO> propertiesToPropertyShortDTOList(List<Property> properties) {
-        List<PropertyShortDTO> result = new ArrayList<>();
-        for (Property property : properties) {
-            PropertyShortDTO psDTO = new PropertyShortDTO(
-                    property.getId(),
-                    propertyAmenitiesToAmenityDTO(property.getPropertyAmenities()),
-                    addressMapper.toDto(property.getAddress()),
-                    property.getType(),
-                    property.getStatus(),
-                    property.getName(),
-                    property.getPricePerNight(),
-                    property.getCurrency(),
-                    property.getSizeSqm(),
-                    property.getMaxGuests(),
-                    property.getBathrooms(),
-                    property.getLivingRoomCount(),
-                    property.getBedroomCount(),
-                    property.getBedSummary(),
-                    property.getMainPhotoUrl()
-            );
-            result.add(psDTO);
-        }
-        return result;
-    }
-
-    public PropertyShortDTO propertyToPropertyShortDTO(Property property) {
+    public PropertyShortDTO propertyToPropertyShortDTO(Property property, ReviewSummaryDTO reviewSummaryDTO) {
 
         return new PropertyShortDTO(
                 property.getId(),
@@ -61,8 +38,39 @@ public class PropertyCustomMapper {
                 property.getLivingRoomCount(),
                 property.getBedroomCount(),
                 property.getBedSummary(),
-                property.getMainPhotoUrl()
+                property.getMainPhotoUrl(),
+                reviewSummaryDTO
         );
+    }
+
+    public PropertyDetailsDTO propertyToPropertyDetailsDTO(Property property, ReviewSummaryDTO reviewSummaryDTO) {
+
+        return new PropertyDetailsDTO(
+                property.getId(),
+                propertyAmenitiesToAmenityDTO(property.getPropertyAmenities()),
+                addressMapper.toDto(property.getAddress()),
+                property.getType(),
+                property.getName(),
+                property.getPricePerNight(),
+                property.getCurrency(),
+                property.getSizeSqm(),
+                property.getMaxGuests(),
+                property.getBathrooms(),
+                property.getLivingRoomCount(),
+                property.getBedroomCount(),
+                property.getBedSummary(),
+                propertyPhotosToString(property.getPropertyPhotos()),
+                property.getMainPhotoUrl(),
+                reviewSummaryDTO
+        );
+    }
+
+    private Set<String> propertyPhotosToString(List<PropertyPhoto> photos) {
+        Set<String> photoUrls = new HashSet<>();
+        for (PropertyPhoto pp : photos) {
+            photoUrls.add(pp.getUrl());
+        }
+        return photoUrls;
     }
 
     private Set<AmenityDTO> propertyAmenitiesToAmenityDTO(Set<PropertyAmenity> propertyAmenities) {

@@ -81,7 +81,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public void logout(
+    public ResponseEntity<@NonNull GenericResponse<Object>> logout(
             @CookieValue(name = REFRESH_COOKIE, required = false) String refreshToken,
             HttpServletResponse response
     ) {
@@ -89,6 +89,8 @@ public class AuthController {
             authService.logout(refreshToken);
         }
         clearRefreshCookie(response);
+        return ResponseFactory.createSuccessResponse(null, MessageConstants.TOKEN_REFRESHED, HttpStatus.ACCEPTED);
+
     }
 
     private void setRefreshCookie(HttpServletResponse response, String refreshToken) {

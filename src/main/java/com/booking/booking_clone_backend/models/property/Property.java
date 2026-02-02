@@ -11,7 +11,9 @@ import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -129,7 +131,7 @@ public class Property {
     private String bedSummary;
 
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<PropertyPhoto> propertyPhotos = new HashSet<>();
+    private List<PropertyPhoto> propertyPhotos = new ArrayList<>();
 
     @Column(name = "main_photo_id")
     private Long mainPhotoId;

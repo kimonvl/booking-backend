@@ -86,4 +86,15 @@ public class GlobalExceptionHandler {
     ResponseEntity<@NonNull GenericResponse<?>> handleUserNotFound(UserNotFoundException exception){
         return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.UNAUTHORIZED);
     }
+
+    /**
+     * Handles cases where property id is not found.
+     *
+     * @param exception the thrown {@link PropertyNotFoundException}
+     * @return a response with a message indicating the authentication failure
+     * */
+    @ExceptionHandler(PropertyNotFoundException.class)
+    ResponseEntity<@NonNull GenericResponse<?>> handlePropertyNotFound(PropertyNotFoundException exception){
+        return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.UNAUTHORIZED);
+    }
 }

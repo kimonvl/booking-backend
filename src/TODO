@@ -1,8 +1,8 @@
-create apartment request:
-    fix main photo id issue
-filtered search:
-    add adult, children, bedroom counter in searchbar in header
-    make search bar in header set destination guest count (adult + children) and check in check out dates in one redux action
+fix:
+    PropertyShortCardDto includes avg rating and review count
+    add description to property entity
+send property Details:
+
 
 refactor:
     appropriate getters and setters of collections in models like cf9

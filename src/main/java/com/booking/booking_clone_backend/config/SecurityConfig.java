@@ -98,6 +98,12 @@ public class SecurityConfig {
                         // Auth endpoints are public (refresh uses cookie)
                         .requestMatchers("/auth/**").permitAll()
 
+                        // Guest endpoints are public
+                        .requestMatchers("/guest/**").permitAll()
+
+                        // Dictionary endpoints are public
+                        .requestMatchers("/dictionary/**").permitAll()
+
                         // Partner area requires PARTNER role
                         .requestMatchers("/partner/**").hasRole("PARTNER")
 
