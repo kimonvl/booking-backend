@@ -1,6 +1,7 @@
 fix:
     PropertyShortCardDto includes avg rating and review count
     add description to property entity
+    post code goes undefined
 send property Details:
 
 

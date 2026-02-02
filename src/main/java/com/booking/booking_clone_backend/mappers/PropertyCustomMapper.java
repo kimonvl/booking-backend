@@ -10,6 +10,7 @@ import com.booking.booking_clone_backend.models.property.PropertyPhoto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,7 +45,7 @@ public class PropertyCustomMapper {
     }
 
     public PropertyDetailsDTO propertyToPropertyDetailsDTO(Property property, ReviewSummaryDTO reviewSummaryDTO) {
-
+        DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
         return new PropertyDetailsDTO(
                 property.getId(),
                 propertyAmenitiesToAmenityDTO(property.getPropertyAmenities()),
@@ -61,7 +62,17 @@ public class PropertyCustomMapper {
                 property.getBedSummary(),
                 propertyPhotosToString(property.getPropertyPhotos()),
                 property.getMainPhotoUrl(),
-                reviewSummaryDTO
+                reviewSummaryDTO,
+
+                property.getCheckInFrom().format(TIME_FMT),
+                property.getCheckInUntil().format(TIME_FMT),
+                property.getCheckOutFrom().format(TIME_FMT),
+                property.getCheckOutUntil().format(TIME_FMT),
+                property.getChildrenAllowed(),
+                property.getCotsOffered(),
+                property.getSmokingAllowed(),
+                property.getPartiesAllowed(),
+                property.getPetsPolicy()
         );
     }
 
