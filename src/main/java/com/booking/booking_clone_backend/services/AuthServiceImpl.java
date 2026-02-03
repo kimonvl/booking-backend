@@ -1,16 +1,20 @@
 package com.booking.booking_clone_backend.services;
 
 import com.booking.booking_clone_backend.DTOs.requests.auth.LoginRequest;
+import com.booking.booking_clone_backend.DTOs.requests.auth.RegisterRequest;
 import com.booking.booking_clone_backend.DTOs.responses.user.UserDTO;
 import com.booking.booking_clone_backend.constants.MessageConstants;
+import com.booking.booking_clone_backend.exceptions.CountryNotFoundException;
 import com.booking.booking_clone_backend.exceptions.EmailAlreadyInUseException;
 import com.booking.booking_clone_backend.exceptions.InvalidRefreshTokenException;
 import com.booking.booking_clone_backend.exceptions.WrongCredentialsException;
 import com.booking.booking_clone_backend.mappers.UserMapper;
+import com.booking.booking_clone_backend.models.property.Country;
 import com.booking.booking_clone_backend.models.refresh_token.RefreshToken;
 import com.booking.booking_clone_backend.models.user.Role;
 import com.booking.booking_clone_backend.models.user.User;
 import com.booking.booking_clone_backend.models.user.UserPrincipal;
+import com.booking.booking_clone_backend.repos.CountryRepo;
 import com.booking.booking_clone_backend.repos.RefreshTokenRepo;
 import com.booking.booking_clone_backend.repos.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +28,14 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HexFormat;
+import java.util.Optional;
 
 @Service
 public class AuthServiceImpl {
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private CountryRepo countryRepo;
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -44,16 +51,22 @@ public class AuthServiceImpl {
     private long refreshDays;
     private final SecureRandom random = new SecureRandom();
 
-    public UserDTO register(String email, String rawPassword, Role role) {
-        String normalized = email.trim().toLowerCase();
+    public UserDTO register(RegisterRequest req) {
+        String normalized = req.email().trim().toLowerCase();
         if (userRepo.existsByEmailIgnoreCase(normalized)) {
             throw new EmailAlreadyInUseException(MessageConstants.EMAIL_ALREADY_IN_USE);
         }
 
         User u = new User();
+        Optional<Country> countryOpt = countryRepo.findByCode(req.country());
+        if (countryOpt.isEmpty())
+            throw new CountryNotFoundException(MessageConstants.COUNTRY_NOT_FOUND);
         u.setEmail(normalized);
-        u.setPasswordHash(passwordEncoder.encode(rawPassword));
-        u.setRole(role);
+        u.setPasswordHash(passwordEncoder.encode(req.password()));
+        u.setRole(req.role());
+        u.setFirstName(req.firstName());
+        u.setLastName(req.lastName());
+        u.setCountry(countryOpt.get());
         u.setEnabled(true);
 
         return userMapper.toDto(userRepo.save(u));

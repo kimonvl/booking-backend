@@ -31,7 +31,13 @@ public interface ReviewRepo extends JpaRepository<@NonNull Review, @NonNull Long
       select new com.booking.booking_clone_backend.DTOs.responses.review.ReviewDTO(
           r.id, r.rating, r.positiveComment, r.negativeComment,
           r.ownerResponse, r.createdAt, r.ownerRespondedAt,
-          new com.booking.booking_clone_backend.DTOs.responses.user.UserDTO(g.id, g.email, g.role)
+          new com.booking.booking_clone_backend.DTOs.responses.user.UserDTO(
+            g.id,
+            g.email,
+            g.role,
+            g.firstName,
+            g.lastName,
+            g.country.code)
       )
       from Review r
       join r.guest g

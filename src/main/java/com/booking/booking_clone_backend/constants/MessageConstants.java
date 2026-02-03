@@ -9,7 +9,7 @@ package com.booking.booking_clone_backend.constants;
 public class MessageConstants {
     public static final String USER_NOT_FOUND = "User not found";
     public static final String PROJECT_NOT_FOUND = "Project not found";
-    public static final String EMAIL_ALREADY_IN_USE = "Email already in use";
+    public static final String EMAIL_ALREADY_IN_USE = "Email already inn use";
     public static final String WRONG_EMAIL_OR_PASSWORD = "Wrong email or password";
     public static final String CHAT_NOT_FOUND = "Chat not found";
     public static final String ISSUE_NOT_FOUND = "Issue not found";
@@ -49,4 +49,5 @@ public class MessageConstants {
     public static final String OPERATIONS_TABLE_FETCHED = "Operations table fetched successfully";
     public static final String PROPERTIES_FETCHED = "Properties fetched successfully";
     public static final String PROPERTY_NOT_FOUND = "Property not found";
+    public static final String COUNTRY_NOT_FOUND = "Country not found";
 }

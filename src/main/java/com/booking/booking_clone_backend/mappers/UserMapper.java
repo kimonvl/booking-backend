@@ -3,6 +3,7 @@ package com.booking.booking_clone_backend.mappers;
 import com.booking.booking_clone_backend.models.user.User;
 import com.booking.booking_clone_backend.DTOs.responses.user.UserDTO;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ public interface UserMapper {
      * @param user the user entity to convert
      * @return the mapped user DTO
      * */
+    @Mapping(target = "country", source = "country.code")
     UserDTO toDto(User user);
 
     /**
@@ -30,6 +32,7 @@ public interface UserMapper {
      * @param users the List of user entities to convert
      * @return the List of mapped user DTOs
      * */
+    @Mapping(target = "country", source = "country.code")
     List<UserDTO> toDtoList(List<User> users);
 }
 

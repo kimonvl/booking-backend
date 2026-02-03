@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
      * */
     @ExceptionHandler(EmailAlreadyInUseException.class)
     ResponseEntity<@NonNull GenericResponse<?>> handleEmailInUse(EmailAlreadyInUseException exception){
-        return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.IM_USED);
+        return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.CONFLICT);
     }
 
     /**
@@ -91,10 +91,21 @@ public class GlobalExceptionHandler {
      * Handles cases where property id is not found.
      *
      * @param exception the thrown {@link PropertyNotFoundException}
-     * @return a response with a message indicating the authentication failure
+     * @return a response with a message indicating the fetching failure
      * */
     @ExceptionHandler(PropertyNotFoundException.class)
     ResponseEntity<@NonNull GenericResponse<?>> handlePropertyNotFound(PropertyNotFoundException exception){
+        return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.UNAUTHORIZED);
+    }
+
+    /**
+     * Handles cases where country code is not found.
+     *
+     * @param exception the thrown {@link PropertyNotFoundException}
+     * @return a response with a message indicating the fetching failure
+     * */
+    @ExceptionHandler(CountryNotFoundException.class)
+    ResponseEntity<@NonNull GenericResponse<?>> handleCountryNotFound(CountryNotFoundException exception){
         return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.UNAUTHORIZED);
     }
 }

@@ -44,7 +44,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<@NonNull GenericResponse<UserDTO>> register(@Valid @RequestBody RegisterRequest req, HttpServletResponse response) {
         return ResponseFactory.createSuccessResponse(
-                authService.register(req.email(),req.password(), req.role()),
+                authService.register(req),
                 MessageConstants.REGISTERED,
                 HttpStatus.CREATED
         );

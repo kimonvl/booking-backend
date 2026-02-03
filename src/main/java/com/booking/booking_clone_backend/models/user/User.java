@@ -1,5 +1,6 @@
 package com.booking.booking_clone_backend.models.user;
 
+import com.booking.booking_clone_backend.models.property.Country;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -31,6 +32,15 @@ public class User {
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "role", columnDefinition = "role_enum", nullable = false)
     private Role role = Role.GUEST;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_code", referencedColumnName = "code", nullable = false)
+    private Country country;
+
+    @Column(name = "first_name", length = 120, nullable = false)
+    private String firstName;
+
+    @Column(name = "last_name", length = 120, nullable = false)
+    private String lastName;
 
     @Column(nullable = false)
     private boolean enabled = true;

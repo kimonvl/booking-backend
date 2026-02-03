@@ -14,5 +14,8 @@ public record UserDTO (
     // Email that the user registered with
     String email,
     //Guest or Partner
-    Role role
+    Role role,
+    String firstName,
+    String lastName,
+    String country
 ){}
