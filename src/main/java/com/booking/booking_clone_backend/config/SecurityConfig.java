@@ -104,6 +104,8 @@ public class SecurityConfig {
                         // Dictionary endpoints are public
                         .requestMatchers("/dictionary/**").permitAll()
 
+                        .requestMatchers("/stripe/webhook").permitAll()
+
                         // Partner area requires PARTNER role
                         .requestMatchers("/partner/**").hasRole("PARTNER")
 

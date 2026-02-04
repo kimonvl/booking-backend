@@ -126,6 +126,14 @@
             <version>2.0.0</version>
         </dependency>
 
+        <!-- Stripe -->
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>31.1.0</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- ✅ Normal test starter (ONLY test scope) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -7,6 +7,7 @@ import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
@@ -54,9 +55,36 @@ public class Booking {
     @Column(name = "status", columnDefinition = "booking_status_enum", nullable = false)
     private BookingStatus status = BookingStatus.CONFIRMED;
 
+
     @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private BookingCheckoutDetails checkoutDetails;
 
+    public void setCheckoutDetails(BookingCheckoutDetails details) {
+        // detach old
+        if (this.checkoutDetails != null) {
+            this.checkoutDetails.setBooking(null);
+        }
+        this.checkoutDetails = details;
+        // attach new
+        if (details != null) {
+            details.setBooking(this); // owning side
+        }
+    }
+    // add fields
+
+    @Column(name = "payment_intent_id", length = 120)
+    private String paymentIntentId;
+
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "payment_status", columnDefinition = "payment_status_enum", nullable = false)
+    private PaymentStatus paymentStatus = PaymentStatus.REQUIRES_PAYMENT;
+
+    @Column(name = "amount_total", precision = 10, scale = 2)
+    private BigDecimal amountTotal;
+
+    @Column(name = "paid_at")
+    private Instant paidAt;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt = Instant.now();

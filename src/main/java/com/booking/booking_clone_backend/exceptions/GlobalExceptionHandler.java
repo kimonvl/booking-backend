@@ -108,4 +108,26 @@ public class GlobalExceptionHandler {
     ResponseEntity<@NonNull GenericResponse<?>> handleCountryNotFound(CountryNotFoundException exception){
         return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.UNAUTHORIZED);
     }
+
+    /**
+     * Handles cases where booking id is not found.
+     *
+     * @param exception the thrown {@link BookingNotFoundException}
+     * @return a response with a message indicating the fetching failure
+     * */
+    @ExceptionHandler(BookingNotFoundException.class)
+    ResponseEntity<@NonNull GenericResponse<?>> handleBookingNotFound(BookingNotFoundException exception){
+        return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.UNAUTHORIZED);
+    }
+
+    /**
+     * Handles cases where property is not available for booking for a given time window.
+     *
+     * @param exception the thrown {@link BookingNotFoundException}
+     * @return a response with a message indicating the fetching failure
+     * */
+    @ExceptionHandler(PropertyAvailabilityException.class)
+    ResponseEntity<@NonNull GenericResponse<?>> handlePropertyAvailability(PropertyAvailabilityException exception){
+        return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.UNAUTHORIZED);
+    }
 }

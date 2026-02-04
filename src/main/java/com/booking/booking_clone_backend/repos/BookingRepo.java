@@ -10,12 +10,15 @@ import org.springframework.data.repository.query.Param;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface BookingRepo extends JpaRepository<@NonNull Booking, @NonNull Long> {
     interface PropertyCountRow {
         Long getPropertyId();
         Long getCount();
     }
+
+    Optional<Booking> findByPaymentIntentId(String paymentIntentId);
 
     @Query("""
     select b.property.id as propertyId, count(b) as count

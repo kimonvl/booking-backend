@@ -49,5 +49,9 @@ public class MessageConstants {
     public static final String OPERATIONS_TABLE_FETCHED = "Operations table fetched successfully";
     public static final String PROPERTIES_FETCHED = "Properties fetched successfully";
     public static final String PROPERTY_NOT_FOUND = "Property not found";
+    public static final String PROPERTY_AVAILABILITY = "Property is not available this period of time";
     public static final String COUNTRY_NOT_FOUND = "Country not found";
+    public static final String BOOKING_NOT_FOUND = "Booking not found";
+    public static final String ATTEMPT_TO_PAY_CANCELED_BOOKING = "Cannot pay a canceled booking";
+    public static final String MISSING_BOOKING_TOTAL_AMOUNT = "Booking total amount not set";
 }
