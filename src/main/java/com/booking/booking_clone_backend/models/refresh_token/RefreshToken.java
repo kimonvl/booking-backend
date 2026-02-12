@@ -1,5 +1,6 @@
 package com.booking.booking_clone_backend.models.refresh_token;
 
+import com.booking.booking_clone_backend.models.AbstractEntity;
 import com.booking.booking_clone_backend.models.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,13 +12,13 @@ import java.time.Instant;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(name = "refresh_tokens",
         indexes = {
                 @Index(name = "idx_refresh_token_token", columnList = "token", unique = true),
                 @Index(name = "idx_refresh_token_user_id", columnList = "user_id")
         })
-public class RefreshToken {
+public class RefreshToken extends AbstractEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +38,4 @@ public class RefreshToken {
 
     @Column(nullable = false)
     private boolean revoked = false;
-
-    @Column(nullable = false)
-    private Instant createdAt = Instant.now();
 }

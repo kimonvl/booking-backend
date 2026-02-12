@@ -20,6 +20,9 @@ CREATE TABLE IF NOT EXISTS booking_checkout_details (
 
     special_request     VARCHAR(1000),
 
+    created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
     CONSTRAINT fk_booking_checkout_details_booking
         FOREIGN KEY (booking_id)
         REFERENCES bookings(id)

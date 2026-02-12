@@ -1,6 +1,7 @@
-package com.booking.booking_clone_backend.models.amenity;
+package com.booking.booking_clone_backend.models.property;
 
-import com.booking.booking_clone_backend.models.property.Property;
+import com.booking.booking_clone_backend.models.AbstractEntity;
+import com.booking.booking_clone_backend.models.static_data.Amenity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,12 +12,12 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(
         name = "property_amenities",
         indexes = @Index(name = "idx_property_amenities_property", columnList = "property_id")
 )
-public class PropertyAmenity {
+public class PropertyAmenity extends AbstractEntity {
 
     @EmbeddedId
     @EqualsAndHashCode.Include

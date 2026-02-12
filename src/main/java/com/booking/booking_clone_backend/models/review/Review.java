@@ -1,5 +1,6 @@
 package com.booking.booking_clone_backend.models.review;
 
+import com.booking.booking_clone_backend.models.AbstractEntity;
 import com.booking.booking_clone_backend.models.booking.Booking;
 import com.booking.booking_clone_backend.models.property.Property;
 import com.booking.booking_clone_backend.models.user.User;
@@ -13,7 +14,7 @@ import java.time.Instant;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(
         name = "reviews",
         indexes = {
@@ -24,7 +25,7 @@ import java.time.Instant;
                 @UniqueConstraint(name = "uk_reviews_booking", columnNames = "booking_id")
         }
 )
-public class Review {
+public class Review extends AbstractEntity {
 
     @Id
     @EqualsAndHashCode.Include
@@ -60,11 +61,4 @@ public class Review {
     @Column(name = "owner_responded_at")
     private Instant ownerRespondedAt;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt = Instant.now();
-
-    @PrePersist
-    public void prePersist() {
-        if (createdAt == null) createdAt = Instant.now();
-    }
 }

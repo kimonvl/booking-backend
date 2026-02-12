@@ -1,7 +1,7 @@
 package com.booking.booking_clone_backend.repos;
 
-import com.booking.booking_clone_backend.models.amenity.Amenity;
-import com.booking.booking_clone_backend.models.amenity.AmenityGroup;
+import com.booking.booking_clone_backend.models.static_data.Amenity;
+import com.booking.booking_clone_backend.models.static_data.AmenityGroup;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 

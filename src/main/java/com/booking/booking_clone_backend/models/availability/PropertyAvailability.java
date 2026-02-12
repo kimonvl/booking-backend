@@ -1,5 +1,6 @@
 package com.booking.booking_clone_backend.models.availability;
 
+import com.booking.booking_clone_backend.models.AbstractEntity;
 import com.booking.booking_clone_backend.models.property.Property;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(
         name = "property_availability",
         indexes = {
@@ -20,7 +21,7 @@ import java.time.LocalDate;
                 @Index(name = "idx_availability_dates", columnList = "start_date, end_date")
         }
 )
-public class PropertyAvailability {
+public class PropertyAvailability extends AbstractEntity {
 
     @Id
     @EqualsAndHashCode.Include
@@ -37,7 +38,4 @@ public class PropertyAvailability {
 
     @Column(nullable = false)
     private LocalDate endDate;
-
-    @Column(nullable = false)
-    private Instant createdAt = Instant.now();
 }

@@ -1,4 +1,4 @@
-package com.booking.booking_clone_backend.models.amenity;
+package com.booking.booking_clone_backend.models.static_data;
 
 import lombok.Getter;
 

@@ -1,5 +1,7 @@
 package com.booking.booking_clone_backend.models.property;
 
+import com.booking.booking_clone_backend.models.AbstractEntity;
+import com.booking.booking_clone_backend.models.static_data.Country;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,7 +10,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(
         name = "property_addresses",
         indexes = {
@@ -17,7 +19,7 @@ import lombok.*;
                 @Index(name = "idx_property_addresses_postcode", columnList = "postcode")
         }
 )
-public class PropertyAddress {
+public class PropertyAddress extends AbstractEntity {
 
     @Id
     @EqualsAndHashCode.Include

@@ -4,7 +4,7 @@ import com.booking.booking_clone_backend.DTOs.responses.dictionaries.amenity.Ame
 import com.booking.booking_clone_backend.DTOs.responses.property.PropertyDetailsDTO;
 import com.booking.booking_clone_backend.DTOs.responses.property.PropertyShortDTO;
 import com.booking.booking_clone_backend.DTOs.responses.review.ReviewSummaryDTO;
-import com.booking.booking_clone_backend.models.amenity.PropertyAmenity;
+import com.booking.booking_clone_backend.models.property.PropertyAmenity;
 import com.booking.booking_clone_backend.models.property.Property;
 import com.booking.booking_clone_backend.models.property.PropertyPhoto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class PropertyCustomMapper {
 
         return new PropertyShortDTO(
                 property.getId(),
-                propertyAmenitiesToAmenityDTO(property.getPropertyAmenities()),
+                propertyAmenitiesToAmenityDTO(property.getAllPropertyAmenities()),
                 addressMapper.toDto(property.getAddress()),
                 property.getType(),
                 property.getStatus(),
@@ -48,7 +48,7 @@ public class PropertyCustomMapper {
         DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
         return new PropertyDetailsDTO(
                 property.getId(),
-                propertyAmenitiesToAmenityDTO(property.getPropertyAmenities()),
+                propertyAmenitiesToAmenityDTO(property.getAllPropertyAmenities()),
                 addressMapper.toDto(property.getAddress()),
                 property.getType(),
                 property.getName(),
@@ -60,7 +60,7 @@ public class PropertyCustomMapper {
                 property.getLivingRoomCount(),
                 property.getBedroomCount(),
                 property.getBedSummary(),
-                propertyPhotosToString(property.getPropertyPhotos()),
+                propertyPhotosToString(property.getAllPropertyPhotos()),
                 property.getMainPhotoUrl(),
                 reviewSummaryDTO,
 

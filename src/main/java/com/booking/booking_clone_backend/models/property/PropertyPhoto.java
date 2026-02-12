@@ -1,5 +1,6 @@
 package com.booking.booking_clone_backend.models.property;
 
+import com.booking.booking_clone_backend.models.AbstractEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,7 +11,7 @@ import java.time.Instant;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(
         name = "property_photos",
         indexes = {
@@ -18,7 +19,7 @@ import java.time.Instant;
                 @Index(name = "idx_property_photos_sort", columnList = "property_id, sortOrder")
         }
 )
-public class PropertyPhoto {
+public class PropertyPhoto extends AbstractEntity {
 
     @Id
     @EqualsAndHashCode.Include
@@ -37,7 +38,4 @@ public class PropertyPhoto {
 
     @Column(nullable = false)
     private int sortOrder = 0;
-
-    @Column(nullable = false)
-    private Instant createdAt = Instant.now();
 }

@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS bookings (
     status          booking_status_enum NOT NULL DEFAULT 'CONFIRMED',
 
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT fk_bookings_property
         FOREIGN KEY (property_id) REFERENCES properties(id)

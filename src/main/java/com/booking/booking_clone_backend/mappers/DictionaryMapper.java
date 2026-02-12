@@ -3,13 +3,12 @@ package com.booking.booking_clone_backend.mappers;
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.amenity.AmenityDTO;
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.country.CountryDTO;
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.language.LanguageDTO;
-import com.booking.booking_clone_backend.models.amenity.Amenity;
-import com.booking.booking_clone_backend.models.language.Language;
-import com.booking.booking_clone_backend.models.property.Country;
+import com.booking.booking_clone_backend.models.static_data.Amenity;
+import com.booking.booking_clone_backend.models.static_data.Language;
+import com.booking.booking_clone_backend.models.static_data.Country;
 import org.mapstruct.Mapper;
 
 import java.util.List;
-import java.util.Set;
 
 @Mapper(componentModel = "spring")
 public interface DictionaryMapper {

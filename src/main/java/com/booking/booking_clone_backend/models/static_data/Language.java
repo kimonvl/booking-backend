@@ -1,5 +1,6 @@
-package com.booking.booking_clone_backend.models.language;
+package com.booking.booking_clone_backend.models.static_data;
 
+import com.booking.booking_clone_backend.models.AbstractEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,14 +9,14 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(
         name = "languages",
         indexes = {
                 @Index(name = "idx_languages_code", columnList = "code", unique = true)
         }
 )
-public class Language {
+public class Language extends AbstractEntity {
 
     @Id
     @EqualsAndHashCode.Include

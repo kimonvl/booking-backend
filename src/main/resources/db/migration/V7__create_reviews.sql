@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS reviews (
     owner_responded_at  TIMESTAMPTZ,
 
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     -- One review per booking
     CONSTRAINT uk_reviews_booking UNIQUE (booking_id),

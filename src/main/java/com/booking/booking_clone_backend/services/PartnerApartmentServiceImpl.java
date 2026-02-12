@@ -5,11 +5,12 @@ import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.Bedroom
 import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.CreateApartmentRequest;
 import com.booking.booking_clone_backend.constants.MessageConstants;
 import com.booking.booking_clone_backend.exceptions.InvalidCountryCodeException;
-import com.booking.booking_clone_backend.models.amenity.Amenity;
-import com.booking.booking_clone_backend.models.amenity.PropertyAmenity;
-import com.booking.booking_clone_backend.models.language.Language;
-import com.booking.booking_clone_backend.models.language.PropertyLanguage;
+import com.booking.booking_clone_backend.models.static_data.Amenity;
+import com.booking.booking_clone_backend.models.property.PropertyAmenity;
+import com.booking.booking_clone_backend.models.static_data.Language;
+import com.booking.booking_clone_backend.models.property.PropertyLanguage;
 import com.booking.booking_clone_backend.models.property.*;
+import com.booking.booking_clone_backend.models.static_data.Country;
 import com.booking.booking_clone_backend.models.user.User;
 import com.booking.booking_clone_backend.repos.AmenitiesRepo;
 import com.booking.booking_clone_backend.repos.CountryRepo;
@@ -115,10 +116,9 @@ public class PartnerApartmentServiceImpl implements PartnerApartmentService {
         for (Amenity amenity : amenities) {
             PropertyAmenity pa = new PropertyAmenity();
             pa.setAmenity(amenity);
-            pa.setProperty(savedProperty);
             pa.setId(new PropertyAmenity.PropertyAmenityId(savedProperty.getId(), amenity.getId()));
 
-            savedProperty.getPropertyAmenities().add(pa);
+            savedProperty.addPropertyAmenity(pa);
         }
 
         //Property-Address
@@ -133,11 +133,10 @@ public class PartnerApartmentServiceImpl implements PartnerApartmentService {
         List<Language> languages = languageRepo.findByCodeIn(request.languages());
         for (Language lang : languages) {
             PropertyLanguage pl = new PropertyLanguage();
-            pl.setProperty(savedProperty);
             pl.setLanguage(lang);
             pl.setId(new PropertyLanguage.PropertyLanguageId(savedProperty.getId(), lang.getId()));
 
-            savedProperty.getPropertyLanguages().add(pl);
+            savedProperty.addPropertyLanguage(pl);
         }
 
         //Upload photos to cloudinary
@@ -146,11 +145,10 @@ public class PartnerApartmentServiceImpl implements PartnerApartmentService {
             //implement main photo later
             CloudinaryService.UploadResult res = cloudinaryService.uploadImage(photos.get(i), folder, "photo_" + i);
             PropertyPhoto pp = new PropertyPhoto();
-            pp.setProperty(savedProperty);
             pp.setUrl(res.url());
             pp.setPublicId(res.publicId());
 
-            savedProperty.getPropertyPhotos().add(pp);
+            savedProperty.addPropertyPhoto(pp);
             if (mainIndex == i) {
                 // fix mainPhotoId
                 savedProperty.setMainPhotoUrl(res.url());

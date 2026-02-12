@@ -1,6 +1,7 @@
-package com.booking.booking_clone_backend.models.language;
+package com.booking.booking_clone_backend.models.property;
 
-import com.booking.booking_clone_backend.models.property.Property;
+import com.booking.booking_clone_backend.models.AbstractEntity;
+import com.booking.booking_clone_backend.models.static_data.Language;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(
         name = "property_languages",
         indexes = {
@@ -19,7 +20,7 @@ import java.io.Serializable;
                 @Index(name = "idx_property_languages_language", columnList = "language_id")
         }
 )
-public class PropertyLanguage {
+public class PropertyLanguage extends AbstractEntity {
 
     @EmbeddedId
     @EqualsAndHashCode.Include

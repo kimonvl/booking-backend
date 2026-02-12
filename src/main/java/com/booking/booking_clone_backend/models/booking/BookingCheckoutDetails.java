@@ -1,14 +1,15 @@
 package com.booking.booking_clone_backend.models.booking;
 
+import com.booking.booking_clone_backend.models.AbstractEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(name = "booking_checkout_details")
-public class BookingCheckoutDetails {
+public class BookingCheckoutDetails extends AbstractEntity {
 
     @Id
     @EqualsAndHashCode.Include

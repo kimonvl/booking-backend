@@ -1,22 +1,22 @@
 package com.booking.booking_clone_backend.models.user;
 
-import com.booking.booking_clone_backend.models.property.Country;
+import com.booking.booking_clone_backend.models.AbstractEntity;
+import com.booking.booking_clone_backend.models.static_data.Country;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-
-import java.time.Instant;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+// Change to uuid for equals and hashcode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(name = "users",
         indexes = @Index(name = "idx_users_email", columnList = "email", unique = true))
-public class User {
+public class User extends AbstractEntity {
     @Id
     @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,7 +44,4 @@ public class User {
 
     @Column(nullable = false)
     private boolean enabled = true;
-
-    @Column(nullable = false)
-    private Instant createdAt = Instant.now();
 }

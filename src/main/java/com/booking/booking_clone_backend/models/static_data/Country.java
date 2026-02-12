@@ -1,5 +1,6 @@
-package com.booking.booking_clone_backend.models.property;
+package com.booking.booking_clone_backend.models.static_data;
 
+import com.booking.booking_clone_backend.models.AbstractEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -12,8 +13,8 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Country {
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+public class Country extends AbstractEntity {
 
     @Id
     @EqualsAndHashCode.Include

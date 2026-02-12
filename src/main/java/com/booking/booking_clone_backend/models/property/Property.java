@@ -1,7 +1,6 @@
 package com.booking.booking_clone_backend.models.property;
 
-import com.booking.booking_clone_backend.models.amenity.PropertyAmenity;
-import com.booking.booking_clone_backend.models.language.PropertyLanguage;
+import com.booking.booking_clone_backend.models.AbstractEntity;
 import com.booking.booking_clone_backend.models.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,19 +8,15 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(
         name = "properties",
         indexes = {
@@ -30,7 +25,7 @@ import java.util.Set;
                 @Index(name = "idx_properties_type", columnList = "type")
         }
 )
-public class Property {
+public class Property extends AbstractEntity {
 
     @Id
     @EqualsAndHashCode.Include
@@ -42,11 +37,45 @@ public class Property {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
+    @Getter(AccessLevel.PROTECTED)
+    @Setter(AccessLevel.PRIVATE)
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PropertyAmenity> propertyAmenities = new HashSet<>();
+    public Set<PropertyAmenity> getAllPropertyAmenities() {
+        return propertyAmenities == null
+                ? Set.of()
+                : Collections.unmodifiableSet(propertyAmenities);
+    }
+    public void addPropertyAmenity(PropertyAmenity propertyAmenity) {
+        if (propertyAmenities == null) propertyAmenities = new HashSet<>();
+        propertyAmenities.add(propertyAmenity);
+        propertyAmenity.setProperty(this);
+    }
+    public void removePropertyAmenity(PropertyAmenity propertyAmenity) {
+        if (propertyAmenities == null) return;
+        propertyAmenities.remove(propertyAmenity);
+        propertyAmenity.setProperty(null);
+    }
 
+    @Getter(AccessLevel.PROTECTED)
+    @Setter(AccessLevel.PRIVATE)
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PropertyLanguage> propertyLanguages = new HashSet<>();
+    public Set<PropertyLanguage> getAllPropertyLanguages() {
+        return propertyLanguages == null
+                ? Set.of()
+                : Collections.unmodifiableSet(propertyLanguages);
+    }
+    public void addPropertyLanguage(PropertyLanguage propertyLanguage) {
+        if (propertyLanguages == null) propertyLanguages = new HashSet<>();
+        propertyLanguages.add(propertyLanguage);
+        propertyLanguage.setProperty(this);
+    }
+    public void removePropertyLanguage(PropertyLanguage propertyLanguage) {
+        if (propertyLanguages == null) return;
+        propertyLanguages.remove(propertyLanguage);
+        propertyLanguage.setProperty(null);
+    }
 
     @OneToOne(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private PropertyAddress address;
@@ -130,23 +159,29 @@ public class Property {
     @Column(nullable = false)
     private String bedSummary;
 
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Getter(AccessLevel.PROTECTED)
+    @Setter(AccessLevel.PRIVATE)
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PropertyPhoto> propertyPhotos = new ArrayList<>();
+    public List<PropertyPhoto> getAllPropertyPhotos() {
+        return propertyPhotos == null
+                ? List.of()
+                : Collections.unmodifiableList(propertyPhotos);
+    }
+    public void addPropertyPhoto(PropertyPhoto propertyPhoto) {
+        if (propertyPhotos == null) propertyPhotos = new ArrayList<>();
+        propertyPhotos.add(propertyPhoto);
+        propertyPhoto.setProperty(this);
+    }
+    public void removePropertyPhoto(PropertyPhoto propertyPhoto) {
+        if (propertyPhotos == null) return;
+        propertyPhotos.remove(propertyPhoto);
+        propertyPhoto.setProperty(null);
+    }
 
     @Column(name = "main_photo_id")
     private Long mainPhotoId;
 
     @Column(name = "main_photo_url")
     private String mainPhotoUrl;
-
-    @Column(nullable = false)
-    private Instant createdAt = Instant.now();
-
-    @Column(nullable = false)
-    private Instant updatedAt = Instant.now();
-
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = Instant.now();
-    }
 }

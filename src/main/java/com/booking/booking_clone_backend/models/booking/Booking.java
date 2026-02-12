@@ -1,5 +1,6 @@
 package com.booking.booking_clone_backend.models.booking;
 
+import com.booking.booking_clone_backend.models.AbstractEntity;
 import com.booking.booking_clone_backend.models.property.Property;
 import com.booking.booking_clone_backend.models.user.User;
 import jakarta.persistence.*;
@@ -16,7 +17,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(
         name = "bookings",
         indexes = {
@@ -26,7 +27,7 @@ import java.time.LocalDate;
                 @Index(name = "idx_bookings_status", columnList = "status")
         }
 )
-public class Booking {
+public class Booking extends AbstractEntity {
 
     @Id
     @EqualsAndHashCode.Include
@@ -85,12 +86,4 @@ public class Booking {
 
     @Column(name = "paid_at")
     private Instant paidAt;
-
-    @Column(name = "created_at", nullable = false)
-    private Instant createdAt = Instant.now();
-
-    @PrePersist
-    public void prePersist() {
-        if (createdAt == null) createdAt = Instant.now();
-    }
 }

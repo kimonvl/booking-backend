@@ -5,10 +5,10 @@ import com.booking.booking_clone_backend.DTOs.responses.dictionaries.amenity.Ame
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.country.CountryDTO;
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.language.LanguageDTO;
 import com.booking.booking_clone_backend.mappers.DictionaryMapper;
-import com.booking.booking_clone_backend.models.amenity.Amenity;
-import com.booking.booking_clone_backend.models.amenity.AmenityGroup;
-import com.booking.booking_clone_backend.models.language.Language;
-import com.booking.booking_clone_backend.models.property.Country;
+import com.booking.booking_clone_backend.models.static_data.Amenity;
+import com.booking.booking_clone_backend.models.static_data.AmenityGroup;
+import com.booking.booking_clone_backend.models.static_data.Language;
+import com.booking.booking_clone_backend.models.static_data.Country;
 import com.booking.booking_clone_backend.repos.AmenitiesRepo;
 import com.booking.booking_clone_backend.repos.CountryRepo;
 import com.booking.booking_clone_backend.repos.LanguageRepo;

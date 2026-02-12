@@ -1,6 +1,6 @@
 package com.booking.booking_clone_backend.repos;
 
-import com.booking.booking_clone_backend.models.language.Language;
+import com.booking.booking_clone_backend.models.static_data.Language;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 
