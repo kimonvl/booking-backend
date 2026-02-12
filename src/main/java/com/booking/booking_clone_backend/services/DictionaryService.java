@@ -10,4 +10,6 @@ public interface DictionaryService {
     List<AmenitiesDictionaryItemDTO> getAmenitiesDictionary();
     List<LanguageDTO> getLanguageDictionary();
     List<CountryDTO> getCountryDictionary();
+
+    boolean isCountryExists(String code);
 }

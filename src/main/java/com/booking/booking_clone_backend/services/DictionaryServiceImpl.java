@@ -56,4 +56,9 @@ public class DictionaryServiceImpl implements DictionaryService{
         List<Country> countries = countryRepo.findAll();
         return dictionaryMapper.countriesToDtoList(countries);
     }
+
+    @Override
+    public boolean isCountryExists(String code) {
+        return countryRepo.existsByCode(code);
+    }
 }
