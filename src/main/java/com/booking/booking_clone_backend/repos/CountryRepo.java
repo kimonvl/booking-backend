@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface CountryRepo extends JpaRepository<@NonNull Country, @NonNull Long> {
     Optional<Country> findByCode(String code);
+
+    boolean existsByCode(String code);
 }

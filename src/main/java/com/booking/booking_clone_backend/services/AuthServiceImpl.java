@@ -16,7 +16,7 @@ import com.booking.booking_clone_backend.models.user.UserPrincipal;
 import com.booking.booking_clone_backend.repos.CountryRepo;
 import com.booking.booking_clone_backend.repos.RefreshTokenRepo;
 import com.booking.booking_clone_backend.repos.UserRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,22 +29,16 @@ import java.time.temporal.ChronoUnit;
 import java.util.HexFormat;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class AuthServiceImpl {
-    @Autowired
-    private UserRepo userRepo;
-    @Autowired
-    private CountryRepo countryRepo;
-    @Autowired
-    private UserMapper userMapper;
-    @Autowired
-    private RefreshTokenRepo refreshRepo;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private AuthenticationManager authManager;
-    @Autowired
-    private JwtService jwtService;
+    private final UserRepo userRepo;
+    private final CountryRepo countryRepo;
+    private final UserMapper userMapper;
+    private final RefreshTokenRepo refreshRepo;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authManager;
+    private final JwtService jwtService;
 
     @Value("${app.jwt.refresh-days}")
     private long refreshDays;
@@ -132,6 +126,10 @@ public class AuthServiceImpl {
         rt.setExpiresAt(Instant.now().plus(refreshDays, ChronoUnit.DAYS));
 
         return refreshRepo.save(rt);
+    }
+
+    public boolean isUserExists(String email) {
+        return userRepo.existsByEmailIgnoreCase(email);
     }
 
     public record AuthResult(String accessToken, String refreshToken, UserDTO userDTO) {}

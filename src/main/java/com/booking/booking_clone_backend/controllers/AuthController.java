@@ -3,34 +3,40 @@ package com.booking.booking_clone_backend.controllers;
 import com.booking.booking_clone_backend.DTOs.requests.auth.LoginRequest;
 import com.booking.booking_clone_backend.DTOs.requests.auth.RegisterRequest;
 import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
-import com.booking.booking_clone_backend.DTOs.responses.user.UserDTO;
 import com.booking.booking_clone_backend.DTOs.responses.auth.AuthResponse;
 import com.booking.booking_clone_backend.constants.MessageConstants;
 import com.booking.booking_clone_backend.controllers.controller_utils.ResponseFactory;
 import com.booking.booking_clone_backend.exceptions.InvalidRefreshTokenException;
 import com.booking.booking_clone_backend.exceptions.MissingRefreshTokenException;
 import com.booking.booking_clone_backend.services.AuthServiceImpl;
+import com.booking.booking_clone_backend.validators.RegisterValidator;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
+import java.util.Locale;
+import java.util.Map;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     private static final String REFRESH_COOKIE = "refresh_token";
 
-    @Autowired
-    private AuthServiceImpl authService;
+    private final AuthServiceImpl authService;
+    private final RegisterValidator registerValidator;
+    private final MessageSource messageSource;
 
     @Value("${app.cookie.secure}")
     private boolean cookieSecure;
@@ -42,19 +48,33 @@ public class AuthController {
     private long refreshDays;
 
     @PostMapping("/register")
-    public ResponseEntity<@NonNull GenericResponse<UserDTO>> register(@Valid @RequestBody RegisterRequest req, HttpServletResponse response) {
-        return ResponseFactory.createSuccessResponse(
-                authService.register(req),
-                MessageConstants.REGISTERED,
-                HttpStatus.CREATED
-        );
+    public ResponseEntity<@NonNull GenericResponse<?>> register(
+            @Valid @RequestBody RegisterRequest req,
+            BindingResult bindingResult,
+            Locale locale
+    ) {
+        registerValidator.validate(req, bindingResult);
+
+        if (bindingResult.hasErrors()) {
+            Map<String, String> fieldErrors = bindingResult.getFieldErrors()
+                    .stream()
+                    .collect(java.util.stream.Collectors.toMap(
+                            org.springframework.validation.FieldError::getField,
+                            fe -> messageSource.getMessage(fe, locale),
+                            (msg1, msg2) -> msg1 // keep first if multiple
+                    ));
+            return new ResponseEntity<>(new GenericResponse<>(fieldErrors, "Registration failed", false), HttpStatus.BAD_REQUEST);
+
+        }
+        return new ResponseEntity<>(new GenericResponse<>(authService.register(req),MessageConstants.REGISTERED, true), HttpStatus.CREATED);
+
     }
 
     @PostMapping("/login")
     public ResponseEntity<@NonNull GenericResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest req, HttpServletResponse response) {
         var result = authService.login(req);
         setRefreshCookie(response, result.refreshToken());
-        return ResponseFactory.createSuccessResponse(new AuthResponse(result.accessToken(), result.userDTO()), MessageConstants.LOGGED_IN, HttpStatus.ACCEPTED) ;
+        return ResponseFactory.createResponse(new AuthResponse(result.accessToken(), result.userDTO()), MessageConstants.LOGGED_IN, HttpStatus.ACCEPTED, true) ;
     }
 
     /**
@@ -73,7 +93,7 @@ public class AuthController {
         try {
             var result = authService.refresh(refreshToken);
             setRefreshCookie(response, result.refreshToken());
-            return ResponseFactory.createSuccessResponse(new AuthResponse(result.accessToken(), result.userDTO()), MessageConstants.TOKEN_REFRESHED, HttpStatus.ACCEPTED);
+            return ResponseFactory.createResponse(new AuthResponse(result.accessToken(), result.userDTO()), MessageConstants.TOKEN_REFRESHED, HttpStatus.ACCEPTED, true);
         } catch (InvalidRefreshTokenException e) {
             clearRefreshCookie(response);
             throw e;
@@ -89,7 +109,7 @@ public class AuthController {
             authService.logout(refreshToken);
         }
         clearRefreshCookie(response);
-        return ResponseFactory.createSuccessResponse(null, MessageConstants.TOKEN_REFRESHED, HttpStatus.ACCEPTED);
+        return ResponseFactory.createResponse(null, MessageConstants.TOKEN_REFRESHED, HttpStatus.ACCEPTED, true);
 
     }
 
