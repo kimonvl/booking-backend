@@ -24,8 +24,8 @@ public class ResponseFactory {
      * @param status the status of the http {@link ResponseEntity}.
      * @return a {@link ResponseEntity} containing the {@link GenericResponse}.
      * */
-    public static <T> ResponseEntity<@NonNull GenericResponse<T>> createSuccessResponse(T data, String message, HttpStatus status) {
+    public static <T> ResponseEntity<@NonNull GenericResponse<T>> createResponse(T data, String message, HttpStatus status, boolean success) {
         ResponseEntity.BodyBuilder builder = ResponseEntity.status(status);
-        return builder.body(new GenericResponse<>(data, message, true));
+        return builder.body(new GenericResponse<>(data, message, success));
     }
 }

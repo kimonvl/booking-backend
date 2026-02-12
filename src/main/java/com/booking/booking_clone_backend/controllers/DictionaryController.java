@@ -7,45 +7,47 @@ import com.booking.booking_clone_backend.DTOs.responses.dictionaries.language.La
 import com.booking.booking_clone_backend.constants.MessageConstants;
 import com.booking.booking_clone_backend.controllers.controller_utils.ResponseFactory;
 import com.booking.booking_clone_backend.services.DictionaryService;
-import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/dictionary")
 public class DictionaryController {
-    @Autowired
-    DictionaryService dictionaryService;
+    private final DictionaryService dictionaryService;
 
     @GetMapping("/getAmenities")
-    public ResponseEntity<@NonNull GenericResponse<List<AmenitiesDictionaryItemDTO>>> getAmenitiesDictionary(HttpServletResponse response) {
-        return ResponseFactory.createSuccessResponse(
+    public ResponseEntity<@NonNull GenericResponse<List<AmenitiesDictionaryItemDTO>>> getAmenitiesDictionary() {
+        return ResponseFactory.createResponse(
                 dictionaryService.getAmenitiesDictionary(),
                 MessageConstants.AMENITIES_DICTIONARY_FETCHED,
-                HttpStatus.ACCEPTED
+                HttpStatus.ACCEPTED,
+                true
         );
     }
 
     @GetMapping("/getLanguages")
-    public ResponseEntity<@NonNull GenericResponse<List<LanguageDTO>>> getLanguageDictionary(HttpServletResponse response) {
-        return ResponseFactory.createSuccessResponse(
+    public ResponseEntity<@NonNull GenericResponse<List<LanguageDTO>>> getLanguageDictionary() {
+        return ResponseFactory.createResponse(
                 dictionaryService.getLanguageDictionary(),
                 MessageConstants.LANGUAGE_DICTIONARY_FETCHED,
-                HttpStatus.ACCEPTED
+                HttpStatus.ACCEPTED,
+                true
         );
     }
 
     @GetMapping("/getCountries")
-    public ResponseEntity<@NonNull GenericResponse<List<CountryDTO>>> getCountryDictionary(HttpServletResponse response) {
-        return ResponseFactory.createSuccessResponse(
+    public ResponseEntity<@NonNull GenericResponse<List<CountryDTO>>> getCountryDictionary() {
+        return ResponseFactory.createResponse(
                 dictionaryService.getCountryDictionary(),
                 MessageConstants.COUNTRY_DICTIONARY_FETCHED,
-                HttpStatus.ACCEPTED
+                HttpStatus.ACCEPTED,
+                true
         );
     }
 

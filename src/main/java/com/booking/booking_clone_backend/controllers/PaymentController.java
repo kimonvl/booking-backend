@@ -6,6 +6,7 @@ import com.booking.booking_clone_backend.DTOs.responses.booking.CreatePaymentInt
 import com.booking.booking_clone_backend.controllers.controller_utils.ResponseFactory;
 import com.booking.booking_clone_backend.services.StripePaymentService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,15 +14,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/payments")
 public class PaymentController {
 
     private final StripePaymentService stripePaymentService;
-
-    public PaymentController(StripePaymentService stripePaymentService) {
-        this.stripePaymentService = stripePaymentService;
-    }
 
     @PostMapping("/create-intent")
     public ResponseEntity<@NonNull GenericResponse<CreatePaymentIntentResponse>> createIntent(
@@ -29,6 +27,6 @@ public class PaymentController {
             Principal principal
     ) {
         var res = stripePaymentService.createPaymentIntent(req, principal.getName());
-        return ResponseFactory.createSuccessResponse(res, "Payment intent created", HttpStatus.OK);
+        return ResponseFactory.createResponse(res, "Payment intent created", HttpStatus.OK, true);
     }
 }
