@@ -104,11 +104,17 @@ public class AuthController {
             @CookieValue(name = REFRESH_COOKIE, required = false) String refreshToken,
             HttpServletResponse response
     ) {
-        if (refreshToken != null && !refreshToken.isBlank()) {
-            authService.logout(refreshToken);
+        try {
+            if (refreshToken != null && !refreshToken.isBlank()) {
+                authService.logout(refreshToken);
+            }
+            clearRefreshCookie(response);
+            return ResponseFactory.createResponse(null, MessageConstants.TOKEN_REFRESHED, HttpStatus.ACCEPTED, true);
+        } catch (Exception e) {
+            clearRefreshCookie(response);
+            throw e;
         }
-        clearRefreshCookie(response);
-        return ResponseFactory.createResponse(null, MessageConstants.TOKEN_REFRESHED, HttpStatus.ACCEPTED, true);
+
 
     }
 

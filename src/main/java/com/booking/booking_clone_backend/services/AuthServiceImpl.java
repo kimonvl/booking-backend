@@ -133,16 +133,26 @@ public class AuthServiceImpl {
             log.warn("Refresh failed: Refresh token is expired", e);
             throw e;
         } catch (Exception e) {
-            log.error("Refresh failed: unexpected system error", e);
+            log.error("Refresh failed: Unexpected system error", e);
             throw e;
         }
 }
 
-    public void logout(String refreshTokenValue) {
-        refreshRepo.findByToken(refreshTokenValue).ifPresent(rt -> {
-            rt.setRevoked(true);
-            refreshRepo.save(rt);
-        });
+    public void logout(String refreshTokenValue) throws EntityNotFoundException {
+        try {
+            RefreshToken token = refreshRepo.findByToken(refreshTokenValue)
+                    .orElseThrow(() -> new EntityNotFoundException("Logout failed: Refresh token not found"));
+
+            token.setRevoked(true);
+            refreshRepo.save(token);
+            log.info("Logout succeeded: User with email={} logged out", token.getUser().getEmail());
+        } catch (EntityNotFoundException e) {
+            log.warn("Logout failed: Refresh token not found", e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Logout failed: Unexpected system error", e);
+            throw e;
+        }
     }
 
     private RefreshToken issueRefreshToken(String email) {
