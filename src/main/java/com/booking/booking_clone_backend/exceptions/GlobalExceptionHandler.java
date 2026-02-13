@@ -43,8 +43,12 @@ public class GlobalExceptionHandler {
      * @return a response with a message indicating that the entity cannot be fetched because it doesn't exist.
      * */
     @ExceptionHandler(EntityNotFoundException.class)
-    ResponseEntity<@NonNull GenericResponse<?>> handleEntityNotFound(EntityNotFoundException exception){
-        return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.NOT_FOUND);
+    ResponseEntity<@NonNull GenericResponse<?>> handleEntityNotFound(
+            EntityNotFoundException exception,
+            Locale locale
+    ){
+        String localized = messageSource.getMessage(exception.getMessage(), null, exception.getMessage(), locale);
+        return new ResponseEntity<>(new GenericResponse<>(null, localized, false), HttpStatus.NOT_FOUND);
     }
 
     /**
@@ -60,10 +64,11 @@ public class GlobalExceptionHandler {
             Locale locale
     ) {
         String localized = messageSource.getMessage(exception.getMessage(), null, exception.getMessage(), locale);
-        return ResponseEntity
-                .badRequest()
-                .body(new GenericResponse<>(null, localized, false));
+        return new ResponseEntity<>(new GenericResponse<>(null, localized, false), HttpStatus.UNAUTHORIZED);
+
     }
+
+    // Exceptions to be fixed.
 
     /**
      * Handles cases where invalid country code is given from frontend.
@@ -73,7 +78,7 @@ public class GlobalExceptionHandler {
      * */
     @ExceptionHandler(InvalidCountryCodeException.class)
     ResponseEntity<@NonNull GenericResponse<?>> handleInvalidCountryCode(InvalidCountryCodeException exception){
-        return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.BAD_REQUEST);
     }
 
     /**

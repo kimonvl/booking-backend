@@ -3,7 +3,6 @@ package com.booking.booking_clone_backend.services;
 import com.booking.booking_clone_backend.DTOs.requests.auth.LoginRequest;
 import com.booking.booking_clone_backend.DTOs.requests.auth.RegisterRequest;
 import com.booking.booking_clone_backend.DTOs.responses.user.UserDTO;
-import com.booking.booking_clone_backend.constants.MessageConstants;
 import com.booking.booking_clone_backend.exceptions.*;
 import com.booking.booking_clone_backend.mappers.UserMapper;
 import com.booking.booking_clone_backend.models.static_data.Country;
@@ -115,10 +114,10 @@ public class AuthServiceImpl implements AuthService {
     {
         try {
             RefreshToken existing = refreshRepo.findByToken(refreshTokenValue)
-                    .orElseThrow(() -> new EntityNotFoundException("Refresh failed: Refresh token not found"));
+                    .orElseThrow(() -> new EntityNotFoundException("auth.refresh_token.not_found"));
 
             if (existing.isRevoked() || existing.getExpiresAt().isBefore(Instant.now())) {
-                throw new EntityInvalidArgumentException("Refresh failed: Refresh token with id=" + existing.getId() + " is expired");
+                throw new EntityInvalidArgumentException("auth.refresh_token.expired");
             }
 
             // rotate refresh token
@@ -147,7 +146,7 @@ public class AuthServiceImpl implements AuthService {
     public void logout(String refreshTokenValue) throws EntityNotFoundException {
         try {
             RefreshToken token = refreshRepo.findByToken(refreshTokenValue)
-                    .orElseThrow(() -> new EntityNotFoundException("Logout failed: Refresh token not found"));
+                    .orElseThrow(() -> new EntityNotFoundException("auth.logout.refresh_token.not_found"));
 
             token.setRevoked(true);
             refreshRepo.save(token);
@@ -161,21 +160,26 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    private RefreshToken issueRefreshToken(String email) {
-        User user = userRepo.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new IllegalStateException("User not found for refresh"));
+    private RefreshToken issueRefreshToken(String email) throws  EntityNotFoundException{
+        try {
+            User user = userRepo.findByEmailIgnoreCase(email)
+                    .orElseThrow(() -> new EntityNotFoundException("auth.refresh_token.user.not_found"));
 
-        byte[] bytes = new byte[32];
-        random.nextBytes(bytes);
-        String token = HexFormat.of().formatHex(bytes);
+            byte[] bytes = new byte[32];
+            random.nextBytes(bytes);
+            String token = HexFormat.of().formatHex(bytes);
 
-        RefreshToken rt = new RefreshToken();
-        rt.setUser(user);
-        rt.setToken(token);
-        rt.setRevoked(false);
-        rt.setExpiresAt(Instant.now().plus(refreshDays, ChronoUnit.DAYS));
-
-        return refreshRepo.save(rt);
+            RefreshToken rt = new RefreshToken();
+            rt.setUser(user);
+            rt.setToken(token);
+            rt.setRevoked(false);
+            rt.setExpiresAt(Instant.now().plus(refreshDays, ChronoUnit.DAYS));
+            log.info("Issue refresh token succeeded for user with email={}", email);
+            return refreshRepo.save(rt);
+        } catch (EntityNotFoundException e) {
+            log.error("Issue refresh token failed: user not found for email={}", email);
+            throw e;
+        }
     }
 
     public boolean isUserExists(String email) {

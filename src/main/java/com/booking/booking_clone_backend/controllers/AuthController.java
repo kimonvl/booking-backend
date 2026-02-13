@@ -62,18 +62,40 @@ public class AuthController {
                             fe -> messageSource.getMessage(fe, locale),
                             (msg1, msg2) -> msg1 // keep first if multiple
                     ));
-            return new ResponseEntity<>(new GenericResponse<>(fieldErrors, "Registration failed", false), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(
+                    new GenericResponse<>(
+                            fieldErrors,
+                            messageSource.getMessage("auth.register.failed", null, "Registration failed", locale),
+                            false
+                    ),
+                    HttpStatus.BAD_REQUEST);
 
         }
-        return new ResponseEntity<>(new GenericResponse<>(authService.register(req),MessageConstants.REGISTERED, true), HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                new GenericResponse<>(
+                        authService.register(req),
+                        messageSource.getMessage("auth.register.succeeded", null, MessageConstants.REGISTERED, locale),
+                        true
+                ),
+                HttpStatus.CREATED);
 
     }
 
     @PostMapping("/login")
-    public ResponseEntity<@NonNull GenericResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest req, HttpServletResponse response) {
+    public ResponseEntity<@NonNull GenericResponse<AuthResponse>> login(
+            @Valid @RequestBody LoginRequest req,
+            HttpServletResponse response,
+            Locale locale
+    ) {
         var result = authService.login(req);
         setRefreshCookie(response, result.refreshToken());
-        return ResponseFactory.createResponse(new AuthResponse(result.accessToken(), result.userDTO()), MessageConstants.LOGGED_IN, HttpStatus.ACCEPTED, true) ;
+        return new ResponseEntity<>(
+                new GenericResponse<>(
+                        new AuthResponse(result.accessToken(), result.userDTO()),
+                        messageSource.getMessage("auth.login.succeeded", null, MessageConstants.LOGGED_IN, locale),
+                        true
+                ),
+                HttpStatus.ACCEPTED);
     }
 
     /**
@@ -83,16 +105,23 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<@NonNull GenericResponse<AuthResponse>> refresh(
             @CookieValue(name = REFRESH_COOKIE, required = false) String refreshToken,
-            HttpServletResponse response
+            HttpServletResponse response,
+            Locale locale
     ) {
         if (refreshToken == null || refreshToken.isBlank()) {
-            throw new EntityInvalidArgumentException("Refresh failed: Refresh token is missing");
+            throw new EntityInvalidArgumentException("auth.refresh_token.not_found");
         }
 
         try {
             var result = authService.refresh(refreshToken);
             setRefreshCookie(response, result.refreshToken());
-            return ResponseFactory.createResponse(new AuthResponse(result.accessToken(), result.userDTO()), MessageConstants.TOKEN_REFRESHED, HttpStatus.ACCEPTED, true);
+            return new ResponseEntity<>(
+                    new GenericResponse<>(
+                            new AuthResponse(result.accessToken(), result.userDTO()),
+                            messageSource.getMessage("auth.refresh.succeeded", null, MessageConstants.TOKEN_REFRESHED, locale),
+                            true
+                    ),
+                    HttpStatus.ACCEPTED);
         } catch (Exception e) {
             clearRefreshCookie(response);
             throw e;
@@ -102,14 +131,21 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<@NonNull GenericResponse<Object>> logout(
             @CookieValue(name = REFRESH_COOKIE, required = false) String refreshToken,
-            HttpServletResponse response
+            HttpServletResponse response,
+            Locale locale
     ) {
         try {
             if (refreshToken != null && !refreshToken.isBlank()) {
                 authService.logout(refreshToken);
             }
             clearRefreshCookie(response);
-            return ResponseFactory.createResponse(null, MessageConstants.LOGGED_OUT, HttpStatus.NO_CONTENT, true);
+            return new ResponseEntity<>(
+                    new GenericResponse<>(
+                            null,
+                            messageSource.getMessage("auth.logout.succeeded", null, MessageConstants.LOGGED_OUT, locale),
+                            true
+                    ),
+                    HttpStatus.NO_CONTENT);
         } catch (Exception e) {
             clearRefreshCookie(response);
             throw e;
