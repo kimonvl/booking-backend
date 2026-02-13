@@ -65,6 +65,9 @@ public class AuthServiceImpl {
         } catch (EntityInvalidArgumentException e) {
             log.error("Registration failed for email={}. Country code={} invalid", req.email(), req.country(), e);
             throw e;
+        } catch (Exception e) {
+            log.error("Register failed: unexpected system error", e);
+            throw e;
         }
     }
 
@@ -96,16 +99,21 @@ public class AuthServiceImpl {
         } catch (WrongCredentialsException e) {
             log.warn("Login failed: role mismatch for email={}", request.email(), e);
             throw e;
+        } catch (Exception e) {
+            log.error("Login failed: unexpected system error", e);
+            throw e;
         }
     }
 
-    public AuthResult refresh(String refreshTokenValue) {
+    public AuthResult refresh(String refreshTokenValue)
+            throws EntityNotFoundException, EntityInvalidArgumentException
+    {
         try {
             RefreshToken existing = refreshRepo.findByToken(refreshTokenValue)
-                    .orElseThrow(() -> new InvalidRefreshTokenException(MessageConstants.INVALID_REFRESH_TOKEN));
+                    .orElseThrow(() -> new EntityNotFoundException("Refresh failed: Refresh token not found"));
 
             if (existing.isRevoked() || existing.getExpiresAt().isBefore(Instant.now())) {
-                throw new InvalidRefreshTokenException(MessageConstants.INVALID_REFRESH_TOKEN);
+                throw new EntityInvalidArgumentException("Refresh failed: Refresh token with id=" + existing.getId() + " is expired");
             }
 
             // rotate refresh token
@@ -116,12 +124,19 @@ public class AuthServiceImpl {
             String access = jwtService.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
             RefreshToken newRefresh = issueRefreshToken(user.getEmail());
 
+            log.info("Refresh and access token issued for user with email={}", user.getEmail());
             return new AuthResult(access, newRefresh.getToken(), userMapper.toDto(user));
+        } catch (EntityNotFoundException e) {
+            log.warn("Refresh failed: Refresh token not found", e);
+            throw e;
+        } catch (EntityInvalidArgumentException e) {
+            log.warn("Refresh failed: Refresh token is expired", e);
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("Refresh failed: unexpected system error", e);
+            throw e;
         }
-
-    }
+}
 
     public void logout(String refreshTokenValue) {
         refreshRepo.findByToken(refreshTokenValue).ifPresent(rt -> {

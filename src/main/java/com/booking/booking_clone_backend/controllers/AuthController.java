@@ -6,8 +6,7 @@ import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
 import com.booking.booking_clone_backend.DTOs.responses.auth.AuthResponse;
 import com.booking.booking_clone_backend.constants.MessageConstants;
 import com.booking.booking_clone_backend.controllers.controller_utils.ResponseFactory;
-import com.booking.booking_clone_backend.exceptions.InvalidRefreshTokenException;
-import com.booking.booking_clone_backend.exceptions.MissingRefreshTokenException;
+import com.booking.booking_clone_backend.exceptions.EntityInvalidArgumentException;
 import com.booking.booking_clone_backend.services.AuthServiceImpl;
 import com.booking.booking_clone_backend.validators.RegisterValidator;
 import jakarta.servlet.http.HttpServletResponse;
@@ -87,14 +86,14 @@ public class AuthController {
             HttpServletResponse response
     ) {
         if (refreshToken == null || refreshToken.isBlank()) {
-            throw new MissingRefreshTokenException(MessageConstants.MISSING_REFRESH_TOKEN);
+            throw new EntityInvalidArgumentException("Refresh failed: Refresh token is missing");
         }
 
         try {
             var result = authService.refresh(refreshToken);
             setRefreshCookie(response, result.refreshToken());
             return ResponseFactory.createResponse(new AuthResponse(result.accessToken(), result.userDTO()), MessageConstants.TOKEN_REFRESHED, HttpStatus.ACCEPTED, true);
-        } catch (InvalidRefreshTokenException e) {
+        } catch (Exception e) {
             clearRefreshCookie(response);
             throw e;
         }

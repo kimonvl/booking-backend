@@ -30,6 +30,17 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles cases where a user attempts to fetch an entity that doesn't exist.
+     *
+     * @param exception the thrown {@link EntityNotFoundException}
+     * @return a response with a message indicating that the entity cannot be fetched because it doesn't exist.
+     * */
+    @ExceptionHandler(EntityNotFoundException.class)
+    ResponseEntity<@NonNull GenericResponse<?>> handleEntityNotFound(EntityNotFoundException exception){
+        return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.NOT_FOUND);
+    }
+
+    /**
      * Handles cases where a user tries to log in with wrong
      * email, password or role.
      *
@@ -39,29 +50,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(WrongCredentialsException.class)
     ResponseEntity<@NonNull GenericResponse<?>> handleWrongCredentials(WrongCredentialsException exception){
         return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.BAD_REQUEST);
-    }
-
-    /**
-     * Handles cases where the access token is missing from the cookies
-     * in a request to a protected endpoint
-     *
-     * @param exception the thrown {@link MissingRefreshTokenException}
-     * @return a response with a message indicating the authorization failure
-     * */
-    @ExceptionHandler(MissingRefreshTokenException.class)
-    ResponseEntity<@NonNull GenericResponse<?>> handleMissingAccessToken(MissingRefreshTokenException exception){
-        return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.UNAUTHORIZED);
-    }
-
-    /**
-     * Handles cases where the access token is expired or invalid.
-     *
-     * @param exception the thrown {@link InvalidRefreshTokenException}
-     * @return a response with a message indicating the authorization failure
-     * */
-    @ExceptionHandler(InvalidRefreshTokenException.class)
-    ResponseEntity<@NonNull GenericResponse<?>> handleInvalidAccessToken(InvalidRefreshTokenException exception){
-        return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.UNAUTHORIZED);
     }
 
     /**
