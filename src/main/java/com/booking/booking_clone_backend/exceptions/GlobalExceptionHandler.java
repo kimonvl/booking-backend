@@ -1,11 +1,15 @@
 package com.booking.booking_clone_backend.exceptions;
 
 import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
+import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Locale;
 
 /**
  * Global exception handler responsible for gathering and translating application-specific
@@ -15,8 +19,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * exception messages into {@link GenericResponse} which is contained inside {@link ResponseEntity}
  * with appropriate http status codes.</p>
  * */
+@RequiredArgsConstructor
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private final MessageSource messageSource;
 
     /**
      * Handles cases where a user attempts to create an entity that already exists.
@@ -48,8 +55,14 @@ public class GlobalExceptionHandler {
      * @return a response with a message indicating authentication failure
      * */
     @ExceptionHandler(WrongCredentialsException.class)
-    ResponseEntity<@NonNull GenericResponse<?>> handleWrongCredentials(WrongCredentialsException exception){
-        return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<@NonNull GenericResponse<?>> handleWrongCredentials(
+            WrongCredentialsException exception,
+            Locale locale
+    ) {
+        String localized = messageSource.getMessage(exception.getMessage(), null, exception.getMessage(), locale);
+        return ResponseEntity
+                .badRequest()
+                .body(new GenericResponse<>(null, localized, false));
     }
 
     /**

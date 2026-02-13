@@ -21,6 +21,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -31,7 +32,7 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class AuthServiceImpl {
+public class AuthServiceImpl implements AuthService {
     private final UserRepo userRepo;
     private final CountryRepo countryRepo;
     private final UserMapper userMapper;
@@ -44,6 +45,8 @@ public class AuthServiceImpl {
     private long refreshDays;
     private final SecureRandom random = new SecureRandom();
 
+    @Override
+    @Transactional(rollbackFor = {EntityAlreadyExistsException.class, EntityInvalidArgumentException.class})
     public UserDTO register(RegisterRequest req) {
         try {
             String normalized = req.email().trim().toLowerCase();
@@ -70,7 +73,8 @@ public class AuthServiceImpl {
             throw e;
         }
     }
-
+    @Override
+    @Transactional(rollbackFor = {AuthenticationException.class, WrongCredentialsException.class})
     public AuthResult login(LoginRequest request) {
         try {
             var auth = authManager.authenticate(
@@ -79,11 +83,11 @@ public class AuthServiceImpl {
 
             var principal = (UserPrincipal) auth.getPrincipal();
             if (principal == null) {
-                throw new WrongCredentialsException(MessageConstants.WRONG_EMAIL_OR_PASSWORD);
+                throw new WrongCredentialsException("auth.wrong_credentials");
             }
             User user = principal.user();
             if (!user.getRole().equals(request.role()))
-                throw new WrongCredentialsException(MessageConstants.WRONG_EMAIL_OR_PASSWORD);
+                throw new WrongCredentialsException("auth.wrong_credentials");
             String access = jwtService.generateAccessToken(
                     principal.getId(),
                     principal.getUsername(),
@@ -95,7 +99,7 @@ public class AuthServiceImpl {
             return new AuthResult(access, refresh.getToken(), userMapper.toDto(user));
         } catch (AuthenticationException e) {
             log.warn("Login failed: bad credentials email={}", request.email(), e);
-            throw new WrongCredentialsException(MessageConstants.WRONG_EMAIL_OR_PASSWORD);
+            throw new WrongCredentialsException("auth.wrong_credentials");
         } catch (WrongCredentialsException e) {
             log.warn("Login failed: role mismatch for email={}", request.email(), e);
             throw e;
@@ -104,7 +108,8 @@ public class AuthServiceImpl {
             throw e;
         }
     }
-
+    @Override
+    @Transactional(rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class})
     public AuthResult refresh(String refreshTokenValue)
             throws EntityNotFoundException, EntityInvalidArgumentException
     {
@@ -137,7 +142,8 @@ public class AuthServiceImpl {
             throw e;
         }
 }
-
+    @Override
+    @Transactional(rollbackFor = {EntityNotFoundException.class})
     public void logout(String refreshTokenValue) throws EntityNotFoundException {
         try {
             RefreshToken token = refreshRepo.findByToken(refreshTokenValue)

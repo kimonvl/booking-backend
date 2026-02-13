@@ -109,13 +109,11 @@ public class AuthController {
                 authService.logout(refreshToken);
             }
             clearRefreshCookie(response);
-            return ResponseFactory.createResponse(null, MessageConstants.TOKEN_REFRESHED, HttpStatus.ACCEPTED, true);
+            return ResponseFactory.createResponse(null, MessageConstants.LOGGED_OUT, HttpStatus.NO_CONTENT, true);
         } catch (Exception e) {
             clearRefreshCookie(response);
             throw e;
         }
-
-
     }
 
     private void setRefreshCookie(HttpServletResponse response, String refreshToken) {
