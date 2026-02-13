@@ -88,33 +88,39 @@ public class AuthServiceImpl {
             );
 
             RefreshToken refresh = issueRefreshToken(principal.getUsername());
+            log.info("Login succeeded: user with email={} authenticated", request.email());
             return new AuthResult(access, refresh.getToken(), userMapper.toDto(user));
         } catch (AuthenticationException e) {
-            log.warn("Login failed: bad credentials email={}", request.email());
+            log.warn("Login failed: bad credentials email={}", request.email(), e);
             throw new WrongCredentialsException(MessageConstants.WRONG_EMAIL_OR_PASSWORD);
         } catch (WrongCredentialsException e) {
-            log.warn("Login failed: role mismatch for email={}", request.email());
+            log.warn("Login failed: role mismatch for email={}", request.email(), e);
             throw e;
         }
     }
 
     public AuthResult refresh(String refreshTokenValue) {
-        RefreshToken existing = refreshRepo.findByToken(refreshTokenValue)
-                .orElseThrow(() -> new InvalidRefreshTokenException(MessageConstants.INVALID_REFRESH_TOKEN));
+        try {
+            RefreshToken existing = refreshRepo.findByToken(refreshTokenValue)
+                    .orElseThrow(() -> new InvalidRefreshTokenException(MessageConstants.INVALID_REFRESH_TOKEN));
 
-        if (existing.isRevoked() || existing.getExpiresAt().isBefore(Instant.now())) {
-            throw new InvalidRefreshTokenException(MessageConstants.INVALID_REFRESH_TOKEN);
+            if (existing.isRevoked() || existing.getExpiresAt().isBefore(Instant.now())) {
+                throw new InvalidRefreshTokenException(MessageConstants.INVALID_REFRESH_TOKEN);
+            }
+
+            // rotate refresh token
+            existing.setRevoked(true);
+            refreshRepo.save(existing);
+
+            User user = existing.getUser();
+            String access = jwtService.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
+            RefreshToken newRefresh = issueRefreshToken(user.getEmail());
+
+            return new AuthResult(access, newRefresh.getToken(), userMapper.toDto(user));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
-        // rotate refresh token
-        existing.setRevoked(true);
-        refreshRepo.save(existing);
-
-        User user = existing.getUser();
-        String access = jwtService.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
-        RefreshToken newRefresh = issueRefreshToken(user.getEmail());
-
-        return new AuthResult(access, newRefresh.getToken(), userMapper.toDto(user));
     }
 
     public void logout(String refreshTokenValue) {
