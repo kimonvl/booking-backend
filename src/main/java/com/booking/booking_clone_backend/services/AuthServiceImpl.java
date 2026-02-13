@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -68,23 +69,31 @@ public class AuthServiceImpl {
     }
 
     public AuthResult login(LoginRequest request) {
-        var auth = authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.password())
-        );
+        try {
+            var auth = authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.email(), request.password())
+            );
 
-        var principal = (UserPrincipal) auth.getPrincipal();
-        assert principal != null;
-        User user = principal.user();
-        if (!user.getRole().equals(request.role()))
+            var principal = (UserPrincipal) auth.getPrincipal();
+            assert principal != null;
+            User user = principal.user();
+            if (!user.getRole().equals(request.role()))
+                throw new WrongCredentialsException(MessageConstants.WRONG_EMAIL_OR_PASSWORD);
+            String access = jwtService.generateAccessToken(
+                    principal.getId(),
+                    principal.getUsername(),
+                    principal.getRole()
+            );
+
+            RefreshToken refresh = issueRefreshToken(principal.getUsername());
+            return new AuthResult(access, refresh.getToken(), userMapper.toDto(user));
+        } catch (AuthenticationException e) {
+            log.warn("Login failed: bad credentials email={}", request.email());
             throw new WrongCredentialsException(MessageConstants.WRONG_EMAIL_OR_PASSWORD);
-        String access = jwtService.generateAccessToken(
-                principal.getId(),
-                principal.getUsername(),
-                principal.getRole()
-        );
-
-        RefreshToken refresh = issueRefreshToken(principal.getUsername());
-        return new AuthResult(access, refresh.getToken(), userMapper.toDto(user));
+        } catch (WrongCredentialsException e) {
+            log.warn("Login failed: role mismatch for email={}", request.email());
+            throw e;
+        }
     }
 
     public AuthResult refresh(String refreshTokenValue) {
