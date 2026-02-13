@@ -75,7 +75,9 @@ public class AuthServiceImpl {
             );
 
             var principal = (UserPrincipal) auth.getPrincipal();
-            assert principal != null;
+            if (principal == null) {
+                throw new WrongCredentialsException(MessageConstants.WRONG_EMAIL_OR_PASSWORD);
+            }
             User user = principal.user();
             if (!user.getRole().equals(request.role()))
                 throw new WrongCredentialsException(MessageConstants.WRONG_EMAIL_OR_PASSWORD);
