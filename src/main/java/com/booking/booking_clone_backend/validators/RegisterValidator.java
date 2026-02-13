@@ -29,11 +29,13 @@ public class RegisterValidator implements Validator {
         if (!errors.hasFieldErrors("email")) {
             if (authService.isUserExists(registerRequest.email())) {
                 errors.rejectValue("email", "username.user.exists");
+                log.warn("Registration failed. User with email={} already exists", registerRequest.email());
             }
         }
         if (!errors.hasFieldErrors("country")) {
             if (!dictionaryService.isCountryExists(registerRequest.country())) {
                 errors.rejectValue("country", "country.invalid");
+                log.warn("Registration failed. Country with code={} doesn't exist", registerRequest.country());
             }
         }
 

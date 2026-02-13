@@ -19,14 +19,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     /**
-     * Handles cases where a user tries to register with an email
-     * already associated with an existing account.
+     * Handles cases where a user attempts to create an entity that already exists.
      *
-     * @param exception the thrown {@link EmailAlreadyInUseException}
-     * @return a response with a message indicating registration failure
+     * @param exception the thrown {@link EntityAlreadyExistsException}
+     * @return a response with a message indicating that the entity cannot be created because it already exists.
      * */
-    @ExceptionHandler(EmailAlreadyInUseException.class)
-    ResponseEntity<@NonNull GenericResponse<?>> handleEmailInUse(EmailAlreadyInUseException exception){
+    @ExceptionHandler(EntityAlreadyExistsException.class)
+    ResponseEntity<@NonNull GenericResponse<?>> handleEntityAlreadyExists(EntityAlreadyExistsException exception){
         return new ResponseEntity<>(new GenericResponse<>(null, exception.getMessage(), false), HttpStatus.CONFLICT);
     }
 

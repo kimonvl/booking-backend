@@ -1,5 +1,7 @@
 package com.booking.booking_clone_backend.mappers;
 
+import com.booking.booking_clone_backend.DTOs.requests.auth.RegisterRequest;
+import com.booking.booking_clone_backend.models.static_data.Country;
 import com.booking.booking_clone_backend.models.user.User;
 import com.booking.booking_clone_backend.DTOs.responses.user.UserDTO;
 import org.mapstruct.Mapper;
@@ -34,5 +36,20 @@ public interface UserMapper {
      * */
     @Mapping(target = "country", source = "country.code")
     List<UserDTO> toDtoList(List<User> users);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "email", source = "emailNormalized")
+    @Mapping(target = "passwordHash", source = "passwordHash")
+    @Mapping(target = "country", source = "country")
+    @Mapping(target = "firstName", source = "req.firstName")
+    @Mapping(target = "lastName", source = "req.lastName")
+    @Mapping(target = "role", source = "req.role")
+    @Mapping(target = "enabled", constant = "true")
+    User registerRequestToUser(RegisterRequest req,
+                             String emailNormalized,
+                             String passwordHash,
+                             Country country);
 }
 
