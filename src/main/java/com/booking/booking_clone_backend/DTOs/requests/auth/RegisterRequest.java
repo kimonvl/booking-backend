@@ -12,5 +12,5 @@ public record RegisterRequest(
         @NotNull Role role, // "GUEST" or "PARTNER" (MVP)
         @NotBlank @Size(min = 2, max = 50) String firstName,
         @NotBlank @Size(min = 2, max = 50) String lastName,
-        @NotBlank @Size(min = 2, max = 50) String country // Code
+        @NotBlank @Size(min = 2, max = 2) String country // Code
 ) {}

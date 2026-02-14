@@ -5,14 +5,17 @@ import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
 import com.stripe.net.Webhook;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+@Slf4j
 @RestController
 @RequestMapping("/stripe")
 public class StripeWebhookController {
@@ -23,19 +26,25 @@ public class StripeWebhookController {
     private String webhookSecret;
 
     @PostMapping("/webhook")
-    public ResponseEntity<String> webhook(HttpServletRequest request,
+    public ResponseEntity<@NonNull String> webhook(HttpServletRequest request,
                                           @RequestHeader("Stripe-Signature") String sigHeader) {
-        try {
-            String payload = new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
+        String payload = null;
+        try {
+            payload = new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
             Event event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
             webhookService.handleEvent(event);
             return ResponseEntity.ok("ok");
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(400).body("invalid signature");
+        } catch (IOException e) {
+            log.error("Request transformation failed for stripe webhook");
+            throw new RuntimeException(e);
+        } catch (SignatureVerificationException e) {
+            log.error("Stripe webhook event cannot be constructed due to invalid signature");
+            throw new RuntimeException(e);
         }
+
+
     }
 
 }
