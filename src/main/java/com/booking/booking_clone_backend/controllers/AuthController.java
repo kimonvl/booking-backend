@@ -139,13 +139,14 @@ public class AuthController {
                 authService.logout(refreshToken);
             }
             clearRefreshCookie(response);
+            System.out.println("logging out");
             return new ResponseEntity<>(
                     new GenericResponse<>(
                             null,
                             messageSource.getMessage("auth.logout.succeeded", null, MessageConstants.LOGGED_OUT, locale),
                             true
                     ),
-                    HttpStatus.NO_CONTENT);
+                    HttpStatus.OK);
         } catch (Exception e) {
             clearRefreshCookie(response);
             throw e;

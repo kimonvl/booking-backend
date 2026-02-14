@@ -4,6 +4,7 @@ import com.booking.booking_clone_backend.models.booking.Booking;
 import com.booking.booking_clone_backend.models.booking.BookingStatus;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -99,4 +100,28 @@ public interface BookingRepo extends JpaRepository<@NonNull Booking, @NonNull Lo
             @Param("from") LocalDate from,
             @Param("to") LocalDate to
     );
+
+    // Find ids of expired holds
+    @Query("""
+        select b.id
+        from Booking b
+        where b.status = :status
+          and b.holdExpiresAt is not null
+          and b.holdExpiresAt < :now
+    """)
+    List<Long> findExpiredPendingIds(@Param("status") BookingStatus status,
+                                     @Param("now") Instant now);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+        update Booking b
+        set b.status = :expiredStatus,
+            b.updatedAt = :now
+        where b.id in :ids
+          and b.status = :pendingStatus
+    """)
+    int markExpired(@Param("ids") List<Long> ids,
+                    @Param("now") Instant now,
+                    @Param("pendingStatus") BookingStatus pendingStatus,
+                    @Param("expiredStatus") BookingStatus expiredStatus);
 }

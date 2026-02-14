@@ -86,4 +86,7 @@ public class Booking extends AbstractEntity {
 
     @Column(name = "paid_at")
     private Instant paidAt;
+
+    @Column(name = "hold_expires_at")
+    private Instant holdExpiresAt;
 }

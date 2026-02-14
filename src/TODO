@@ -1,10 +1,8 @@
 fix:
-    PropertyShortCardDto includes avg rating and review count
-    add description to property entity
     post code goes undefined
-send property Details:
-
-register with details similar to booking checkout
+test: booking a property flow
 
 refactor:
     appropriate getters and setters of collections in models like cf9
+    add uuid to entities for comparison aside from the db id
+    dictionaries sorted

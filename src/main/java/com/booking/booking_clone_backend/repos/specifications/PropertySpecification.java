@@ -1,5 +1,6 @@
 package com.booking.booking_clone_backend.repos.specifications;
 
+import com.booking.booking_clone_backend.models.availability.PropertyAvailability;
 import com.booking.booking_clone_backend.models.booking.Booking;
 import com.booking.booking_clone_backend.models.booking.BookingStatus;
 import com.booking.booking_clone_backend.models.property.PetsPolicy;
@@ -85,23 +86,22 @@ public class PropertySpecification {
         return (root, query, cb) -> {
             if (checkIn == null || checkOut == null) return cb.conjunction();
 
-            // NOT EXISTS (select 1 from Booking b where b.property = root and overlap and status confirmed)
+            // NOT EXISTS (select 1 from PropertyAvailability pa where pa.property = root and overlap)
             Subquery<Long> sq = query.subquery(Long.class);
-            var b = sq.from(Booking.class);
+            var pa = sq.from(PropertyAvailability.class);
 
             sq.select(cb.literal(1L));
 
-            var sameProperty = cb.equal(b.get("property"), root);
+            var sameProperty = cb.equal(pa.get("property"), root);
 
-            var confirmed = cb.equal(b.get("status"), BookingStatus.CONFIRMED);
+            // overlap for [start, end) convention:
+            // pa.start < checkOut AND pa.end > checkIn
+            var overlap = cb.and(
+                    cb.lessThan(pa.get("startDate"), checkOut),
+                    cb.greaterThan(pa.get("endDate"), checkIn)
+            );
 
-            var overlap =
-                    cb.and(
-                            cb.lessThan(b.get("checkInDate"), checkOut),
-                            cb.greaterThan(b.get("checkOutDate"), checkIn)
-                    );
-
-            sq.where(cb.and(sameProperty, confirmed, overlap));
+            sq.where(cb.and(sameProperty, overlap));
 
             return cb.not(cb.exists(sq));
         };

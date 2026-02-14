@@ -8,15 +8,19 @@ import com.stripe.model.Event;
 import com.stripe.model.PaymentIntent;
 import com.stripe.model.StripeObject;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class StripeWebhookServiceImpl implements StripeWebhookService{
-    @Autowired
-    private BookingRepo bookingRepo;
+
+    private final PropertyAvailabilityService propertyAvailabilityService;
+    private final BookingRepo bookingRepo;
 
     @Override
     @Transactional
@@ -71,6 +75,8 @@ public class StripeWebhookServiceImpl implements StripeWebhookService{
                 .ifPresent(booking -> {
                     if (booking.getPaymentStatus() == PaymentStatus.SUCCEEDED) return;
                     booking.setPaymentStatus(PaymentStatus.FAILED);
+                    booking.setStatus(BookingStatus.CANCELLED);
+                    propertyAvailabilityService.deleteBlocksByBookingIds(List.of(booking.getId()));
                     bookingRepo.save(booking);
                 });
     }

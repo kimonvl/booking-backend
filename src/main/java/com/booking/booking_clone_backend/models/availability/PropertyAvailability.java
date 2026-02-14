@@ -1,6 +1,7 @@
 package com.booking.booking_clone_backend.models.availability;
 
 import com.booking.booking_clone_backend.models.AbstractEntity;
+import com.booking.booking_clone_backend.models.booking.Booking;
 import com.booking.booking_clone_backend.models.property.Property;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,6 +32,11 @@ public class PropertyAvailability extends AbstractEntity {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "property_id", nullable = false)
     private Property property;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id", unique = true)
+    private Booking booking;
+
 
     // Use [startDate, endDate) convention (end exclusive) in your service logic
     @Column(nullable = false)
