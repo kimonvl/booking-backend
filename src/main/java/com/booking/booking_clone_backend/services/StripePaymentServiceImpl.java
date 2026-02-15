@@ -18,6 +18,7 @@ import com.booking.booking_clone_backend.repos.UserRepo;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,6 +32,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class StripePaymentServiceImpl implements StripePaymentService{
     @Autowired
@@ -93,6 +95,7 @@ public class StripePaymentServiceImpl implements StripePaymentService{
             booking.setPaymentStatus(PaymentStatus.PROCESSING);
             bookingRepo.save(booking);
 
+            log.info("Payment intent created for booking with id={} and guest with email={}", booking, email);
             return intent.getClientSecret();
         } catch (StripeException e) {
             if (booking != null) {
@@ -100,6 +103,9 @@ public class StripePaymentServiceImpl implements StripePaymentService{
                 bookingRepo.save(booking);
             }
             throw e;
-        } // catch the rest of the exceptions
+        } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
+            log.warn("Create payment intent failed for booking with id={} and guest with email={}", bookingId, email, e);
+            throw e;
+        }
     }
 }
