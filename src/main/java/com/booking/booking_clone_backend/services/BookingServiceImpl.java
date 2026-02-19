@@ -98,6 +98,20 @@ public class BookingServiceImpl implements BookingService{
         }
     }
 
+    @Override
+    public void deleteBooking(Long bookingId) {
+        try {
+            Booking booking = bookingRepo.findById(bookingId)
+                    .orElseThrow(() -> new EntityNotFoundException("booking.delete.not_found"));
+            bookingRepo.delete(booking);
+            log.info("Booking deleted with id={}", bookingId);
+        } catch (EntityNotFoundException e) {
+            log.warn("Booking deletion failed: Booking with id ={} not found", bookingId, e);
+            throw e;
+        }
+
+    }
+
     private boolean isExclusionViolation(DataIntegrityViolationException e) {
         Throwable t = e;
         while (t != null) {

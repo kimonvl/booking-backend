@@ -55,4 +55,21 @@ public class BookingController {
         );
 
     }
+
+    @PostMapping("/cancel/{bookingId}")
+    public ResponseEntity<@NonNull GenericResponse<?>> cancelBooking(
+            @PathVariable Long bookingId,
+            Locale locale
+    ) {
+        bookingService.deleteBooking(bookingId);
+        return new ResponseEntity<>(
+                new GenericResponse<>(
+                        null,
+                        messageSource.getMessage("booking.deleted", null, MessageConstants.BOOKING_DELETED, locale),
+                        true
+                ),
+                HttpStatus.CREATED
+        );
+
+    }
 }

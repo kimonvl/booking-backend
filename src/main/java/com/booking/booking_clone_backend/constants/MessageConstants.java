@@ -51,6 +51,7 @@ public class MessageConstants {
     public static final String PROPERTY_NOT_FOUND = "Property not found";
     public static final String PROPERTY_AVAILABILITY = "Property is not available this period of time";
     public static final String BOOKING_CREATED = "Booking created. Proceed to payment to confirm it const.";
+    public static final String BOOKING_DELETED = "Booking deleted successfully const.";
     public static final String COUNTRY_NOT_FOUND = "Country not found";
     public static final String BOOKING_NOT_FOUND = "Booking not found";
     public static final String ATTEMPT_TO_PAY_CANCELED_BOOKING = "Cannot pay a canceled booking";
