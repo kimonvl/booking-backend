@@ -51,6 +51,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new GenericResponse<>(null, localized, false), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(EntityInvalidArgumentException.class)
+    ResponseEntity<@NonNull GenericResponse<?>> handleEntityInvalidArgument(
+            EntityInvalidArgumentException exception,
+            Locale locale
+    ){
+        String localized = messageSource.getMessage(exception.getMessage(), null, exception.getMessage(), locale);
+        return new ResponseEntity<>(new GenericResponse<>(null, localized, false), HttpStatus.NOT_ACCEPTABLE);
+    }
+
     /**
      * Handles cases where a user tries to log in with wrong
      * email, password or role.
