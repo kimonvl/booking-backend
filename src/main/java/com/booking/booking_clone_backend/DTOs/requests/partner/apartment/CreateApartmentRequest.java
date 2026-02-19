@@ -3,32 +3,101 @@ package com.booking.booking_clone_backend.DTOs.requests.partner.apartment;
 import com.booking.booking_clone_backend.DTOs.responses.property.AddressDTO;
 import com.booking.booking_clone_backend.models.property.ParkingPolicy;
 import com.booking.booking_clone_backend.models.property.PetsPolicy;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import org.jspecify.annotations.NonNull;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 public record CreateApartmentRequest(
+        @NotBlank(message = "{NotBlank.createApartmentRequest.propertyName}")
+        @Size(min = 3, max = 200, message = "{Size.createApartmentRequest.propertyName}")
+
+        // (A) allow letters, digits, punctuation/symbols, spaces, but NO control chars (no \n \t etc.)
+        @Pattern(
+                regexp = "^[^\\p{Cntrl}]+$",
+                message = "{Pattern.createApartmentRequest.propertyName.invalidChars}"
+        )
+
+        // (B) must contain at least 3 alphabetic letters (Unicode letters, not only A-Z)
+        @Pattern(
+                regexp = "^(?=(?:.*\\p{L}){3,}).*$",
+                message = "{Pattern.createApartmentRequest.propertyName.minLetters}"
+        )
         String propertyName,
+
+        @NotNull(message = "{NotNull.createApartmentRequest.address}")
+        @Valid
         AddressDTO address,
+
+        @NotNull(message = "{NotNull.createApartmentRequest.sleepingAreas}")
+        @Valid
         SleepingAreasDTO sleepingAreas,
+
+        @NotNull(message = "{NotNull.createApartmentRequest.guestCount}")
+        @Min(value = 1, message = "{Min.createApartmentRequest.guestCount}")
+        @Max(value = 50, message = "{Max.createApartmentRequest.guestCount}")
         Integer guestCount,
+
+        @NotNull(message = "{NotNull.createApartmentRequest.bathroomCount}")
+        @Min(value = 0, message = "{Min.createApartmentRequest.bathroomCount}")
+        @Max(value = 50, message = "{Max.createApartmentRequest.bathroomCount}")
         Integer bathroomCount,
+
+        @NotNull(message = "{NotNull.createApartmentRequest.allowChildren}")
         Boolean allowChildren,
+
+        @NotNull(message = "{NotNull.createApartmentRequest.offerCots}")
         Boolean offerCots,
+
+        @NotNull(message = "{NotNull.createApartmentRequest.aptSize}")
+        @DecimalMin(value = "0.0", inclusive = false, message = "{DecimalMin.createApartmentRequest.aptSize}")
+        @Digits(integer = 10, fraction = 2, message = "{Digits.createApartmentRequest.aptSize}")
         BigDecimal aptSize,
-        List<String> amenities,
+
+        @NotNull(message = "{NotNull.createApartmentRequest.amenities}")
+        List<@NotBlank(message = "{NotBlank.createApartmentRequest.amenities}") String> amenities,
+
+        @NotNull(message = "{NotNull.createApartmentRequest.serveBreakfast}")
         Boolean serveBreakfast,
+
+        @NotNull(message = "{NotNull.createApartmentRequest.isParkingAvailable}")
         ParkingPolicy isParkingAvailable,
-        List<String> languages,
+
+        @NotNull(message = "{NotNull.createApartmentRequest.languages}")
+        List<@NotBlank(message = "{NotBlank.createApartmentRequest.languages}") String> languages,
+
+        @NotNull(message = "{NotNull.createApartmentRequest.smokingAllowed}")
         Boolean smokingAllowed,
+
+        @NotNull(message = "{NotNull.createApartmentRequest.partiesAllowed}")
         Boolean partiesAllowed,
+
+        @NotNull(message = "{NotNull.createApartmentRequest.petsAllowed}")
         PetsPolicy petsAllowed,
+
+        // better as LocalTime, but if you keep String:
+        @NotBlank(message = "{NotBlank.createApartmentRequest.checkInFrom}")
         String checkInFrom,
+
+        @NotBlank(message = "{NotBlank.createApartmentRequest.checkInUntil}")
         String checkInUntil,
+
+        @NotBlank(message = "{NotBlank.createApartmentRequest.checkOutFrom}")
         String checkOutFrom,
+
+        @NotBlank(message = "{NotBlank.createApartmentRequest.checkOutUntil}")
         String checkOutUntil,
+
+        @NotNull(message = "{NotNull.createApartmentRequest.photosCount}")
+        @Min(value = 0, message = "{Min.createApartmentRequest.photosCount}")
+        @Max(value = 200, message = "{Max.createApartmentRequest.photosCount}")
         Integer photosCount,
+
+        @NotNull(message = "{NotNull.createApartmentRequest.pricePerNight}")
+        @DecimalMin(value = "0.0", inclusive = false, message = "{DecimalMin.createApartmentRequest.pricePerNight}")
+        @Digits(integer = 10, fraction = 2, message = "{Digits.createApartmentRequest.pricePerNight}")
         BigDecimal pricePerNight
 ) {
     @Override
