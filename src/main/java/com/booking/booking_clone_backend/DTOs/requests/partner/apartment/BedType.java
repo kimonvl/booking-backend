@@ -2,18 +2,22 @@ package com.booking.booking_clone_backend.DTOs.requests.partner.apartment;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Getter;
 
 public enum BedType {
-    SINGLE("single"),
-    DOUBLE("double"),
-    KING_SIZE("king_size"),
-    SINGLE_SOFA("single_sofa"),
-    DOUBLE_SOFA("double_sofa");
+    SINGLE("single", 1),
+    DOUBLE("double", 2),
+    KING_SIZE("king_size", 2),
+    SINGLE_SOFA("single_sofa", 1),
+    DOUBLE_SOFA("double_sofa", 2);
 
     private final String wire;
+    @Getter
+    private final int capacity;
 
-    BedType(String wire) {
+    BedType(String wire, int capacity) {
         this.wire = wire;
+        this.capacity = capacity;
     }
 
     @JsonValue
