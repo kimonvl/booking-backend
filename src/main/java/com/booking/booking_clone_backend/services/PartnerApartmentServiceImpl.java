@@ -61,10 +61,10 @@ public class PartnerApartmentServiceImpl implements PartnerApartmentService {
         property.setSmokingAllowed(request.smokingAllowed());
         property.setPartiesAllowed(request.partiesAllowed());
         property.setPetsPolicy(request.petsAllowed());
-        property.setCheckInFrom(LocalTime.parse(request.checkInFrom()));
-        property.setCheckInUntil(LocalTime.parse(request.checkInUntil()));
-        property.setCheckOutFrom(LocalTime.parse(request.checkOutFrom()));
-        property.setCheckOutUntil(LocalTime.parse(request.checkOutUntil()));
+        property.setCheckInFrom(request.checkInFrom());
+        property.setCheckInUntil(request.checkInUntil());
+        property.setCheckOutFrom(request.checkOutFrom());
+        property.setCheckOutUntil(request.checkOutUntil());
         property.setBathrooms(request.bathroomCount());
         try {
             property.setSleepingAreasJson(objectMapper.writeValueAsString(request.sleepingAreas()));
@@ -163,7 +163,7 @@ public class PartnerApartmentServiceImpl implements PartnerApartmentService {
         address.setProperty(savedProperty);
         address.setCountry(country);
         address.setCity(request.address().city());
-        address.setPostcode(request.address().postcode());
+        address.setPostcode(request.address().postCode());
         address.setStreet(request.address().street());
         address.setStreetNumber(request.address().streetNumber());
         return address;
