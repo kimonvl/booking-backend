@@ -16,7 +16,7 @@ import lombok.*;
         indexes = {
                 @Index(name = "idx_property_addresses_city", columnList = "city"),
                 @Index(name = "idx_property_addresses_country", columnList = "country_code"), // ✅ matches SQL
-                @Index(name = "idx_property_addresses_postcode", columnList = "postcode")
+                @Index(name = "idx_property_addresses_postcode", columnList = "postCode")
         }
 )
 public class PropertyAddress extends AbstractEntity {

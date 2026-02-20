@@ -16,9 +16,9 @@ public record AddressDTO(
         @Size(min = 2, max = 120, message = "{Size.addressDTO.city}")
         String city,
 
-        @NotBlank(message = "{NotBlank.addressDTO.postcode}")
-        @Pattern(regexp = "^\\d{5}$", message = "{Pattern.addressDTO.postcode}")
-        String postcode,
+        @NotBlank(message = "{NotBlank.addressDTO.postCode}")
+        @Pattern(regexp = "^\\d{5}$", message = "{Pattern.addressDTO.postCode}")
+        String postCode,
 
         @NotBlank(message = "{NotBlank.addressDTO.street}")
         @Size(min = 2, max = 200, message = "{Size.addressDTO.street}")

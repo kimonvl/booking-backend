@@ -8,22 +8,16 @@ import jakarta.validation.constraints.*;
 import org.jspecify.annotations.NonNull;
 
 import java.math.BigDecimal;
+import java.time.LocalTime;
 import java.util.List;
 
 public record CreateApartmentRequest(
         @NotBlank(message = "{NotBlank.createApartmentRequest.propertyName}")
         @Size(min = 3, max = 200, message = "{Size.createApartmentRequest.propertyName}")
 
-        // (A) allow letters, digits, punctuation/symbols, spaces, but NO control chars (no \n \t etc.)
         @Pattern(
-                regexp = "^[^\\p{Cntrl}]+$",
-                message = "{Pattern.createApartmentRequest.propertyName.invalidChars}"
-        )
-
-        // (B) must contain at least 3 alphabetic letters (Unicode letters, not only A-Z)
-        @Pattern(
-                regexp = "^(?=(?:.*\\p{L}){3,}).*$",
-                message = "{Pattern.createApartmentRequest.propertyName.minLetters}"
+                regexp = "^(?=(?:.*\\p{L}){3,})[^\\p{Cntrl}]+$",
+                message = "{Pattern.createApartmentRequest.propertyName.invalid}"
         )
         String propertyName,
 
@@ -41,7 +35,7 @@ public record CreateApartmentRequest(
         Integer guestCount,
 
         @NotNull(message = "{NotNull.createApartmentRequest.bathroomCount}")
-        @Min(value = 0, message = "{Min.createApartmentRequest.bathroomCount}")
+        @Min(value = 1, message = "{Min.createApartmentRequest.bathroomCount}")
         @Max(value = 50, message = "{Max.createApartmentRequest.bathroomCount}")
         Integer bathroomCount,
 
@@ -77,18 +71,17 @@ public record CreateApartmentRequest(
         @NotNull(message = "{NotNull.createApartmentRequest.petsAllowed}")
         PetsPolicy petsAllowed,
 
-        // better as LocalTime, but if you keep String:
-        @NotBlank(message = "{NotBlank.createApartmentRequest.checkInFrom}")
-        String checkInFrom,
+        @NotNull(message = "{NotNull.createApartmentRequest.checkInFrom}")
+        LocalTime checkInFrom,
 
-        @NotBlank(message = "{NotBlank.createApartmentRequest.checkInUntil}")
-        String checkInUntil,
+        @NotNull(message = "{NotNull.createApartmentRequest.checkInUntil}")
+        LocalTime checkInUntil,
 
-        @NotBlank(message = "{NotBlank.createApartmentRequest.checkOutFrom}")
-        String checkOutFrom,
+        @NotNull(message = "{NotNull.createApartmentRequest.checkOutFrom}")
+        LocalTime checkOutFrom,
 
-        @NotBlank(message = "{NotBlank.createApartmentRequest.checkOutUntil}")
-        String checkOutUntil,
+        @NotNull(message = "{NotNull.createApartmentRequest.checkOutUntil}")
+        LocalTime checkOutUntil,
 
         @NotNull(message = "{NotNull.createApartmentRequest.photosCount}")
         @Min(value = 0, message = "{Min.createApartmentRequest.photosCount}")
