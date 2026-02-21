@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -32,7 +34,7 @@ public class PartnerApartmentController {
     private final MessageSource messageSource;
 
     @PostMapping(value = "/addApartment", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<@NonNull GenericResponse<Property>> addApartment(
+    public ResponseEntity<@NonNull GenericResponse<?>> addApartment(
             @Valid @RequestPart(value = "data") CreateApartmentRequest req,
             BindingResult bindingResult,
             @RequestPart(value = "photos") List<MultipartFile> photos,
@@ -43,13 +45,20 @@ public class PartnerApartmentController {
 
         createApartmentValidator.validate(req, bindingResult);
         if (bindingResult.hasErrors()) {
-            AtomicReference<String> msg = new AtomicReference<>();
-            bindingResult.getFieldErrors().forEach(fieldError ->
-            {
-                msg.set(messageSource.getMessage(fieldError, locale));
-                System.out.println(msg.get());
-            }
-           );
+            Map<String, String> fieldErrors = bindingResult.getFieldErrors()
+                    .stream()
+                    .collect(java.util.stream.Collectors.toMap(
+                            org.springframework.validation.FieldError::getField,
+                            fe -> messageSource.getMessage(fe, locale),
+                            (msg1, msg2) -> msg1 // keep first if multiple
+                    ));
+            return new ResponseEntity<>(
+                    new GenericResponse<>(
+                            fieldErrors,
+                            messageSource.getMessage("property.create.failed", null, "Failed to add apartment", locale),
+                            false
+                    ),
+                    HttpStatus.BAD_REQUEST);
         }
 
         apartmentService.addApartment(req, photos, Integer.valueOf(mainIndex), principal.user());
