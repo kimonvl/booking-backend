@@ -13,7 +13,7 @@ public record AddressDTO(
         String country, // ISO code like "GR"
 
         @NotBlank(message = "{NotBlank.addressDTO.city}")
-        @Size(min = 2, max = 120, message = "{Size.addressDTO.city}")
+        @Size(min = 3, max = 120, message = "{Size.addressDTO.city}")
         String city,
 
         @NotBlank(message = "{NotBlank.addressDTO.postCode}")

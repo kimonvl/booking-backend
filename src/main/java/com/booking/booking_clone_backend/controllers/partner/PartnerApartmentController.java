@@ -62,6 +62,6 @@ public class PartnerApartmentController {
         }
 
         apartmentService.addApartment(req, photos, Integer.valueOf(mainIndex), principal.user());
-        return ResponseEntity.ok(new GenericResponse<>(null, "OK", true));
+        return ResponseEntity.ok(new GenericResponse<>(null, "property.create.success", true));
     }
 }
