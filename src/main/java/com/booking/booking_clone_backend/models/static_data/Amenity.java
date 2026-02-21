@@ -21,12 +21,12 @@ import org.hibernate.type.SqlTypes;
 public class Amenity extends AbstractEntity {
 
     @Id
-    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     // e.g. "WIFI", "AIR_CONDITIONING"
     @Column(nullable = false, unique = true, length = 80)
+    @EqualsAndHashCode.Include
     private String code;
 
     // e.g. "Free WiFi"

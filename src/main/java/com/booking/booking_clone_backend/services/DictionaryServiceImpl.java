@@ -15,8 +15,7 @@ import com.booking.booking_clone_backend.repos.LanguageRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class DictionaryServiceImpl implements DictionaryService{
@@ -30,7 +29,7 @@ public class DictionaryServiceImpl implements DictionaryService{
     DictionaryMapper dictionaryMapper;
 
     @Override
-    public List<AmenitiesDictionaryItemDTO> getAmenitiesDictionary() {
+    public List<AmenitiesDictionaryItemDTO> getAmenitiesDictionaryGroupByGroupName() {
         List<AmenitiesDictionaryItemDTO> result = new ArrayList<>();
         List<Amenity> amenities = amenitiesRepo.findAll();
         //improve to one query and group by group name in java
@@ -61,4 +60,33 @@ public class DictionaryServiceImpl implements DictionaryService{
     public boolean isCountryExists(String code) {
         return countryRepo.existsByCode(code);
     }
+
+    @Override
+    public List<String> findIncorrectAmenityCodes(List<String> codes) {
+        List<Amenity> existing = amenitiesRepo.findByCodeIn(codes);
+        Set<Amenity> existingSet = new HashSet<>(existing);
+
+        return codes.stream()
+                .filter(code -> {
+                    Amenity amenity = new Amenity();
+                    amenity.setCode(code);
+                    return !existingSet.contains(amenity);
+                })
+                .toList();
+    }
+
+    @Override
+    public List<String> findIncorrectLanguageCodes(List<String> codes) {
+        List<Language> existing = languageRepo.findByCodeIn(codes);
+        Set<Language> existingSet = new HashSet<>(existing);
+
+        return codes.stream()
+                .filter(code -> {
+                    Language language = new Language();
+                    language.setCode(code);
+                    return !existingSet.contains(language);
+                })
+                .toList();
+    }
+
 }

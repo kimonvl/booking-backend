@@ -24,7 +24,7 @@ public class DictionaryController {
     @GetMapping("/getAmenities")
     public ResponseEntity<@NonNull GenericResponse<List<AmenitiesDictionaryItemDTO>>> getAmenitiesDictionary() {
         return ResponseFactory.createResponse(
-                dictionaryService.getAmenitiesDictionary(),
+                dictionaryService.getAmenitiesDictionaryGroupByGroupName(),
                 MessageConstants.AMENITIES_DICTIONARY_FETCHED,
                 HttpStatus.ACCEPTED,
                 true
