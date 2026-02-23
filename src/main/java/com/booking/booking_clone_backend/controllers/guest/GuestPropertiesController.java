@@ -7,6 +7,7 @@ import com.booking.booking_clone_backend.DTOs.responses.property.PropertyShortDT
 import com.booking.booking_clone_backend.constants.MessageConstants;
 import com.booking.booking_clone_backend.controllers.controller_utils.ResponseFactory;
 import com.booking.booking_clone_backend.services.GuestApartmentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
@@ -22,7 +23,7 @@ public class GuestPropertiesController {
     private final GuestApartmentService guestApartmentService;
 
     @PostMapping("/search")
-    public ResponseEntity<@NonNull GenericResponse<Page<@NonNull PropertyShortDTO>>> search(@RequestBody PropertySearchRequest request) {
+    public ResponseEntity<@NonNull GenericResponse<Page<@NonNull PropertyShortDTO>>> search(@Valid @RequestBody PropertySearchRequest request) {
 
         return ResponseFactory.createResponse(
                 guestApartmentService.search(request),

@@ -1,6 +1,7 @@
 package com.booking.booking_clone_backend.validators;
 
 import com.booking.booking_clone_backend.DTOs.requests.auth.RegisterRequest;
+import com.booking.booking_clone_backend.DTOs.requests.guest.property.PropertySearchRequest;
 import com.booking.booking_clone_backend.services.AuthServiceImpl;
 import com.booking.booking_clone_backend.services.DictionaryService;
 import lombok.RequiredArgsConstructor;
@@ -13,30 +14,19 @@ import org.springframework.validation.Validator;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class RegisterValidator implements Validator {
-
-    private final AuthServiceImpl authService;
-    private final DictionaryService dictionaryService;
+public class SearchFiltersValidator implements Validator {
 
     @Override
     public boolean supports(@NonNull Class<?> clazz) {
-        return RegisterRequest.class == clazz;
+        return PropertySearchRequest.class == clazz;
     }
 
     @Override
     public void validate(@NonNull Object target, @NonNull Errors errors) {
         RegisterRequest registerRequest = (RegisterRequest) target;
         if (!errors.hasFieldErrors("email")) {
-            if (authService.isUserExists(registerRequest.email())) {
-                errors.rejectValue("email", "username.user.exists");
-                log.warn("Registration failed. User with email={} already exists", registerRequest.email());
-            }
+
         }
-        if (!errors.hasFieldErrors("country")) {
-            if (!dictionaryService.isCountryExists(registerRequest.country())) {
-                errors.rejectValue("country", "country.invalid");
-                log.warn("Registration failed. Country with code={} doesn't exist", registerRequest.country());
-            }
-        }
+
     }
 }
