@@ -17,6 +17,7 @@ public class MessageConstants {
     public static final String USER_NOT_IN_PROJECT = "User doesn't have access to this project";
     public static final String INVITED_USER_NOT_IN_PROJECT = "Invited user doesn't have access to this project";
     public static final String REGISTERED = "Registered successfully";
+    public static final String REGISTERED_FAILED = "Registration failed";
     public static final String LOGGED_IN = "Logged in successfully";
     public static final String LOGGED_OUT = "Logged out successfully";
     public static final String USER_IS_AUTHENTICATED = "User is authenticated";

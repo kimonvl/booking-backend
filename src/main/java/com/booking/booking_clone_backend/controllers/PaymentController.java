@@ -1,12 +1,9 @@
 package com.booking.booking_clone_backend.controllers;
 
-import com.booking.booking_clone_backend.DTOs.requests.booking.CreateBookingRequest;
 import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
-import com.booking.booking_clone_backend.DTOs.responses.booking.CreatePaymentIntentResponse;
 import com.booking.booking_clone_backend.controllers.controller_utils.ResponseFactory;
 import com.booking.booking_clone_backend.services.StripePaymentService;
 import com.stripe.exception.StripeException;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.MessageSource;

@@ -65,7 +65,7 @@ public class AuthController {
             return new ResponseEntity<>(
                     new GenericResponse<>(
                             fieldErrors,
-                            messageSource.getMessage("auth.register.failed", null, "Registration failed", locale),
+                            messageSource.getMessage("auth.register.failed", null, MessageConstants.REGISTERED_FAILED, locale),
                             false
                     ),
                     HttpStatus.BAD_REQUEST);

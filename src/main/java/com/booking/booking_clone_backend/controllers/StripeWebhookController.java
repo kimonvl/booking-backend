@@ -26,9 +26,10 @@ public class StripeWebhookController {
     private String webhookSecret;
 
     @PostMapping("/webhook")
-    public ResponseEntity<@NonNull String> webhook(HttpServletRequest request,
-                                          @RequestHeader("Stripe-Signature") String sigHeader) {
-
+    public ResponseEntity<@NonNull String> webhook(
+            HttpServletRequest request,
+            @RequestHeader("Stripe-Signature") String sigHeader
+    ) {
         String payload = null;
         try {
             payload = new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
