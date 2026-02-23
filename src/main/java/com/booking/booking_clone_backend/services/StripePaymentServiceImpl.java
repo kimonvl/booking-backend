@@ -56,21 +56,21 @@ public class StripePaymentServiceImpl implements StripePaymentService{
         Booking booking = null;
         try {
             booking = bookingRepo.findById(bookingId)
-                    .orElseThrow(() -> new EntityNotFoundException("payment_intent.create.property.not_found"));
+                    .orElseThrow(() -> new EntityNotFoundException("payment.create.property.not_found"));
             User user = userRepo.findByEmailIgnoreCase(email)
-                    .orElseThrow(() -> new EntityNotFoundException("payment_intent.create.user.not_found"));
+                    .orElseThrow(() -> new EntityNotFoundException("payment.create.user.not_found"));
 
             // Check if user that issues the payment request is the same as the user that created the booking
             if (!Objects.equals(user, booking.getGuest())) {
-                throw new EntityInvalidArgumentException("payment_intent.create.user.mismatch");
+                throw new EntityInvalidArgumentException("payment.create.user.mismatch");
             }
 
             if (booking.getPaymentStatus() != PaymentStatus.REQUIRES_PAYMENT) {
-                throw new EntityInvalidArgumentException("payment_intent.create.booking.not_pending");
+                throw new EntityInvalidArgumentException("payment.create.booking.not_pending");
             }
 
             if (booking.getHoldExpiresAt() != null && booking.getHoldExpiresAt().isBefore(Instant.now())) {
-                throw new EntityInvalidArgumentException("payment_intent.create.hold.expired");
+                throw new EntityInvalidArgumentException("payment.create.hold.expired");
             }
 
             long amountInCents = booking.getAmountTotal()

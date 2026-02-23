@@ -3,7 +3,7 @@ package com.booking.booking_clone_backend.services;
 import com.booking.booking_clone_backend.DTOs.responses.partner.primary_account.PropertyOperationRowDTO;
 import com.booking.booking_clone_backend.DTOs.responses.partner.primary_account.SummaryTileDTO;
 import com.booking.booking_clone_backend.constants.MessageConstants;
-import com.booking.booking_clone_backend.exceptions.UserNotFoundException;
+import com.booking.booking_clone_backend.exceptions.EntityNotFoundException;
 import com.booking.booking_clone_backend.mappers.AddressMapper;
 import com.booking.booking_clone_backend.models.booking.BookingStatus;
 import com.booking.booking_clone_backend.models.property.Property;
@@ -34,10 +34,9 @@ public class PrimaryAccountServiceImpl implements PrimaryAccountService{
 
     @Override
     public List<PropertyOperationRowDTO> getOperationsTable(String userEmail) {
-        Optional<User> ownerOpt = userRepo.findByEmailIgnoreCase(userEmail);
-        if (ownerOpt.isEmpty())
-            throw new UserNotFoundException(MessageConstants.USER_NOT_FOUND);
-        User owner = ownerOpt.get();
+        User owner = userRepo.findByEmailIgnoreCase(userEmail)
+                .orElseThrow(() -> new EntityNotFoundException("primary_account.operations_table.user.not_found"));
+
 
         List<PropertyOperationRowDTO> propertyOperationTable = new ArrayList<>();
         List<Property> properties = propertyRepo.findByOwner(owner);
@@ -90,7 +89,7 @@ public class PrimaryAccountServiceImpl implements PrimaryAccountService{
     public List<SummaryTileDTO> getSummaryTiles(String userEmail) {
         Optional<User> ownerOpt = userRepo.findByEmailIgnoreCase(userEmail);
         if (ownerOpt.isEmpty())
-            throw new UserNotFoundException(MessageConstants.USER_NOT_FOUND);
+            throw new EntityNotFoundException(MessageConstants.USER_NOT_FOUND);
         User owner = ownerOpt.get();
 
         ZoneId zone = ZoneId.of("Europe/Athens");

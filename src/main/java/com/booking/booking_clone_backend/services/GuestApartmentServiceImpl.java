@@ -5,7 +5,7 @@ import com.booking.booking_clone_backend.DTOs.responses.property.PropertyDetails
 import com.booking.booking_clone_backend.DTOs.responses.property.PropertyShortDTO;
 import com.booking.booking_clone_backend.DTOs.responses.review.ReviewSummaryDTO;
 import com.booking.booking_clone_backend.constants.MessageConstants;
-import com.booking.booking_clone_backend.exceptions.PropertyNotFoundException;
+import com.booking.booking_clone_backend.exceptions.EntityNotFoundException;
 import com.booking.booking_clone_backend.mappers.PropertyCustomMapper;
 import com.booking.booking_clone_backend.models.property.Property;
 import com.booking.booking_clone_backend.repos.PropertyRepo;
@@ -37,9 +37,6 @@ public class GuestApartmentServiceImpl implements GuestApartmentService{
 
     @Override
     public Page<@NonNull PropertyShortDTO> search(PropertySearchRequest request) {
-
-
-
         Specification<@NonNull Property> spec = Specification
                 //.where(PropertySpecification.isPublished())
                 .where(PropertySpecification.cityEqualsIgnoreCase(request.city()))
@@ -82,7 +79,7 @@ public class GuestApartmentServiceImpl implements GuestApartmentService{
     public PropertyDetailsDTO getPropertyDetails(Long propertyId) {
         Optional<@NonNull Property> propertyOpt = propertyRepo.findById(propertyId);
         if (propertyOpt.isEmpty()) {
-            throw new PropertyNotFoundException(MessageConstants.PROPERTY_NOT_FOUND);
+            throw new EntityNotFoundException(MessageConstants.PROPERTY_NOT_FOUND);
         }
         ReviewSummaryDTO reviewSummaryDTO = reviewService.getPropertyReviewSummary(propertyOpt.get().getId());
         return propertyCustomMapper.propertyToPropertyDetailsDTO(propertyOpt.get(), reviewSummaryDTO);
