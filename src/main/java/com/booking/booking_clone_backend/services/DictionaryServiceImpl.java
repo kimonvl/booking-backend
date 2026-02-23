@@ -77,7 +77,7 @@ public class DictionaryServiceImpl implements DictionaryService{
 
     @Override
     public List<String> findIncorrectLanguageCodes(List<String> codes) {
-        List<Language> existing = languageRepo.findByCodeIn(codes);
+        List<Language> existing = languageRepo.findByCodeInIgnoreCase(codes);
         Set<Language> existingSet = new HashSet<>(existing);
 
         return codes.stream()

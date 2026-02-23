@@ -77,6 +77,16 @@ public class GlobalExceptionHandler {
 
     }
 
+    @ExceptionHandler(MediaUploadFailedException.class)
+    ResponseEntity<@NonNull GenericResponse<?>> handleMediaUpload(
+            MediaUploadFailedException exception,
+            Locale locale
+    ){
+        String localized = messageSource.getMessage(exception.getMessage(), null, exception.getMessage(), locale);
+        return new ResponseEntity<>(new GenericResponse<>(null, localized, false), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
     // Exceptions to be fixed.
 
     /**

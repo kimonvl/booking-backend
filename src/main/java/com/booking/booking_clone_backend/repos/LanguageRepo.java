@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface LanguageRepo extends JpaRepository<@NonNull Language, @NonNull Long> {
-    List<Language> findByCodeIn(List<String> codes);
+    List<Language> findByCodeInIgnoreCase(List<String> codes);
 }

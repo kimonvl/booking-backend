@@ -1,13 +1,16 @@
 package com.booking.booking_clone_backend.mappers;
 
+import com.booking.booking_clone_backend.DTOs.domain.BedSummaryResult;
+import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.CreateApartmentRequest;
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.amenity.AmenityDTO;
 import com.booking.booking_clone_backend.DTOs.responses.property.PropertyDetailsDTO;
 import com.booking.booking_clone_backend.DTOs.responses.property.PropertyShortDTO;
 import com.booking.booking_clone_backend.DTOs.responses.review.ReviewSummaryDTO;
-import com.booking.booking_clone_backend.models.property.PropertyAmenity;
-import com.booking.booking_clone_backend.models.property.Property;
-import com.booking.booking_clone_backend.models.property.PropertyPhoto;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.booking.booking_clone_backend.models.property.*;
+import com.booking.booking_clone_backend.models.user.User;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.format.DateTimeFormatter;
@@ -16,11 +19,48 @@ import java.util.List;
 import java.util.Set;
 
 @Component
+@RequiredArgsConstructor
 public class PropertyCustomMapper {
-    @Autowired
-    DictionaryMapper dictionaryMapper;
-    @Autowired
-    AddressMapper addressMapper;
+
+    private final DictionaryMapper dictionaryMapper;
+    private final AddressMapper addressMapper;
+    private final ObjectMapper objectMapper;
+
+    public Property createApartmentRequestToProperty(
+            CreateApartmentRequest request,
+            BedSummaryResult bedSummaryResult,
+            User user
+    ) throws JsonProcessingException {
+        Property property = new Property();
+        property.setOwner(user);
+        property.setType(PropertyType.APARTMENT);
+        property.setStatus(PropertyStatus.DRAFT);
+        property.setName(request.propertyName());
+        property.setPricePerNight(request.pricePerNight());
+        property.setCurrency(CurrencyCode.EUR);
+        property.setMaxGuests(request.guestCount());
+        property.setSizeSqm(request.aptSize());
+        property.setChildrenAllowed(request.allowChildren());
+        property.setCotsOffered(request.offerCots());
+        property.setBreakfastServed(request.serveBreakfast());
+        property.setParkingPolicy(request.isParkingAvailable());
+        property.setSmokingAllowed(request.smokingAllowed());
+        property.setPartiesAllowed(request.partiesAllowed());
+        property.setPetsPolicy(request.petsAllowed());
+        property.setCheckInFrom(request.checkInFrom());
+        property.setCheckInUntil(request.checkInUntil());
+        property.setCheckOutFrom(request.checkOutFrom());
+        property.setCheckOutUntil(request.checkOutUntil());
+        property.setBathrooms(request.bathroomCount());
+
+        property.setSleepingAreasJson(objectMapper.writeValueAsString(request.sleepingAreas()));
+
+        property.setLivingRoomCount(bedSummaryResult.livingRoomCount());
+        property.setBedroomCount(request.sleepingAreas().bedrooms().size());
+        property.setBedCount(bedSummaryResult.bedCount());
+        property.setBedSummary(bedSummaryResult.bedSummary().toString());
+        return property;
+    }
 
     public PropertyShortDTO propertyToPropertyShortDTO(Property property, ReviewSummaryDTO reviewSummaryDTO) {
 

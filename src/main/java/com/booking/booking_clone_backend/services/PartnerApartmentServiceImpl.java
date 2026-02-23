@@ -1,10 +1,16 @@
 package com.booking.booking_clone_backend.services;
 
+import com.booking.booking_clone_backend.DTOs.domain.BedSummaryResult;
 import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.BedType;
 import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.BedroomDTO;
 import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.CreateApartmentRequest;
+import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.SleepingAreasDTO;
+import com.booking.booking_clone_backend.DTOs.responses.property.AddressDTO;
 import com.booking.booking_clone_backend.constants.MessageConstants;
+import com.booking.booking_clone_backend.exceptions.EntityInvalidArgumentException;
 import com.booking.booking_clone_backend.exceptions.InvalidCountryCodeException;
+import com.booking.booking_clone_backend.exceptions.MediaUploadFailedException;
+import com.booking.booking_clone_backend.mappers.PropertyCustomMapper;
 import com.booking.booking_clone_backend.models.static_data.Amenity;
 import com.booking.booking_clone_backend.models.property.PropertyAmenity;
 import com.booking.booking_clone_backend.models.static_data.Language;
@@ -18,6 +24,8 @@ import com.booking.booking_clone_backend.repos.LanguageRepo;
 import com.booking.booking_clone_backend.repos.PropertyRepo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,54 +37,122 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
+@Slf4j
 public class PartnerApartmentServiceImpl implements PartnerApartmentService {
-    @Autowired
-    CloudinaryService cloudinaryService;
-    @Autowired
-    private PropertyRepo propertyRepo;
-    @Autowired
-    private AmenitiesRepo amenitiesRepo;
-    @Autowired
-    private CountryRepo countryRepo;
-    @Autowired
-    private LanguageRepo languageRepo;
-    @Autowired
-    ObjectMapper objectMapper;
+
+    private final CloudinaryService cloudinaryService;
+    private final PropertyRepo propertyRepo;
+    private final AmenitiesRepo amenitiesRepo;
+    private final CountryRepo countryRepo;
+    private final LanguageRepo languageRepo;
+    private final PropertyCustomMapper propertyCustomMapper;
 
     @Override
     public void addApartment(CreateApartmentRequest request, List<MultipartFile> photos, Integer mainIndex, User user) {
-        Property property = new Property();
-        property.setOwner(user);
-        property.setType(PropertyType.APARTMENT);
-        property.setStatus(PropertyStatus.DRAFT);
-        property.setName(request.propertyName());
-        property.setPricePerNight(request.pricePerNight());
-        property.setCurrency(CurrencyCode.EUR);
-        property.setMaxGuests(request.guestCount());
-        property.setSizeSqm(request.aptSize());
-        property.setChildrenAllowed(request.allowChildren());
-        property.setCotsOffered(request.offerCots());
-        property.setBreakfastServed(request.serveBreakfast());
-        property.setParkingPolicy(request.isParkingAvailable());
-        property.setSmokingAllowed(request.smokingAllowed());
-        property.setPartiesAllowed(request.partiesAllowed());
-        property.setPetsPolicy(request.petsAllowed());
-        property.setCheckInFrom(request.checkInFrom());
-        property.setCheckInUntil(request.checkInUntil());
-        property.setCheckOutFrom(request.checkOutFrom());
-        property.setCheckOutUntil(request.checkOutUntil());
-        property.setBathrooms(request.bathroomCount());
         try {
-            property.setSleepingAreasJson(objectMapper.writeValueAsString(request.sleepingAreas()));
+            BedSummaryResult result = getBedSummaryResult(request.sleepingAreas());
+            Property savedProperty = propertyRepo.save(propertyCustomMapper.createApartmentRequestToProperty(request, result, user));
+
+            //Property-Amenity
+            addAmenities(request.amenities(), savedProperty);
+
+            //Property-Address
+            addAddress(request.address(), savedProperty);
+
+            //Property-Languages
+            addLanguages(request.languages(), savedProperty);
+
+            //Upload photos to cloudinary
+            addPhotos(photos, mainIndex, savedProperty);
+
+            log.info("Property created successfully with id={}", savedProperty.getId());
+            propertyRepo.save(savedProperty);
+        } catch (EntityInvalidArgumentException e) {
+            log.warn("Property creation failed for user with email ={}.", user.getEmail(), e);
+            throw e;
+        } catch (MediaUploadFailedException e) {
+            log.warn("Property creation failed during media upload.", e);
+            throw e;
         } catch (JsonProcessingException e) {
+            log.error("Property creation failed during json processing.");
             throw new RuntimeException(e);
         }
+    }
 
+    private void addPhotos(List<MultipartFile> photos, Integer mainIndex, Property savedProperty) throws MediaUploadFailedException {
+        try {
+            String folder = "booking/properties/" + savedProperty.getId();
+            for (int i = 0; i < photos.size(); i++) {
+                //implement main photo later
+                CloudinaryService.UploadResult res = cloudinaryService.uploadImage(photos.get(i), folder, "photo_" + i);
+                PropertyPhoto pp = new PropertyPhoto();
+                pp.setUrl(res.url());
+                pp.setPublicId(res.publicId());
+
+                savedProperty.addPropertyPhoto(pp);
+                if (mainIndex == i) {
+                    // fix mainPhotoId
+                    savedProperty.setMainPhotoUrl(res.url());
+                }
+            }
+        } catch (MediaUploadFailedException e) {
+            throw new MediaUploadFailedException("create_apartment.photos.upload_failed");
+        }
+    }
+
+    private void addLanguages(List<String> languageCodes, Property savedProperty) throws EntityInvalidArgumentException {
+        List<Language> languages = languageRepo.findByCodeInIgnoreCase(languageCodes);
+        if (languages.isEmpty())
+            throw new EntityInvalidArgumentException("create_apartment.languages.empty");
+        for (Language lang : languages) {
+            PropertyLanguage pl = new PropertyLanguage();
+            pl.setLanguage(lang);
+            pl.setId(new PropertyLanguage.PropertyLanguageId(savedProperty.getId(), lang.getId()));
+
+            savedProperty.addPropertyLanguage(pl);
+        }
+    }
+
+
+    private void addAmenities(List<String> amenityCodes, Property savedProperty) throws EntityInvalidArgumentException{
+        List<Amenity> amenities = amenitiesRepo.findByCodeIn(amenityCodes);
+        if (amenities.isEmpty())
+            throw new EntityInvalidArgumentException("create_apartment.amenities.empty");
+        for (Amenity amenity : amenities) {
+            PropertyAmenity pa = new PropertyAmenity();
+            pa.setAmenity(amenity);
+            pa.setId(new PropertyAmenity.PropertyAmenityId(savedProperty.getId(), amenity.getId()));
+
+            savedProperty.addPropertyAmenity(pa);
+        }
+    }
+
+    private void addAddress(AddressDTO address, Property savedProperty) throws EntityInvalidArgumentException {
+        Country country = countryRepo.findByCode(address.country())
+                .orElseThrow(() -> new EntityInvalidArgumentException("create_apartment.country.not_found"));
+
+        PropertyAddress pa = getPropertyAddress(address, country, savedProperty);
+        savedProperty.setAddress(pa);
+    }
+
+    private static PropertyAddress getPropertyAddress(AddressDTO address, Country country, Property savedProperty) {
+        PropertyAddress pa = new PropertyAddress();
+        pa.setProperty(savedProperty);
+        pa.setCountry(country);
+        pa.setCity(address.city());
+        pa.setPostcode(address.postCode());
+        pa.setStreet(address.street());
+        pa.setStreetNumber(address.streetNumber());
+        return pa;
+    }
+
+    public static BedSummaryResult getBedSummaryResult(SleepingAreasDTO sleepingAreas) {
         //Bedroom and Living room beds
         Integer bedCount = 0;
         int livingRoomCount = 0;
         Map<BedType, Integer> totalBeds = new HashMap<>();
-        for (BedroomDTO bedroom : request.sleepingAreas().bedrooms()) {
+        for (BedroomDTO bedroom : sleepingAreas.bedrooms()) {
             if (bedroom != null) {
                 for (Map.Entry<BedType, Integer> entry : bedroom.beds().entrySet()) {
                     bedCount += entry.getValue();
@@ -87,9 +163,9 @@ public class PartnerApartmentServiceImpl implements PartnerApartmentService {
                 }
             }
         }
-        if (request.sleepingAreas().livingRoom() != null) {
+        if (sleepingAreas.livingRoom() != null) {
             livingRoomCount += 1;
-            for (Map.Entry<BedType, Integer> entry : request.sleepingAreas().livingRoom().beds().entrySet()) {
+            for (Map.Entry<BedType, Integer> entry : sleepingAreas.livingRoom().beds().entrySet()) {
                 bedCount += entry.getValue();
                 totalBeds.compute(
                         entry.getKey(),
@@ -104,68 +180,6 @@ public class PartnerApartmentServiceImpl implements PartnerApartmentService {
         }
         bedSummary.delete(bedSummary.length()-2, bedSummary.length());
         bedSummary.append(")");
-        property.setLivingRoomCount(livingRoomCount);
-        property.setBedroomCount(request.sleepingAreas().bedrooms().size());
-        property.setBedCount(bedCount);
-        property.setBedSummary(bedSummary.toString());
-
-        Property savedProperty = propertyRepo.save(property);
-
-        //Property-Amenity
-        List<Amenity> amenities = amenitiesRepo.findByCodeIn(request.amenities());
-        for (Amenity amenity : amenities) {
-            PropertyAmenity pa = new PropertyAmenity();
-            pa.setAmenity(amenity);
-            pa.setId(new PropertyAmenity.PropertyAmenityId(savedProperty.getId(), amenity.getId()));
-
-            savedProperty.addPropertyAmenity(pa);
-        }
-
-        //Property-Address
-        Optional<Country> countryOpt = countryRepo.findByCode(request.address().country());
-        if (countryOpt.isEmpty())
-            throw new InvalidCountryCodeException(MessageConstants.INVALID_COUNTRY_CODE);
-        Country country = countryOpt.get();
-        PropertyAddress address = getPropertyAddress(request, country, savedProperty);
-        savedProperty.setAddress(address);
-
-        //Property-Languages
-        List<Language> languages = languageRepo.findByCodeIn(request.languages());
-        for (Language lang : languages) {
-            PropertyLanguage pl = new PropertyLanguage();
-            pl.setLanguage(lang);
-            pl.setId(new PropertyLanguage.PropertyLanguageId(savedProperty.getId(), lang.getId()));
-
-            savedProperty.addPropertyLanguage(pl);
-        }
-
-        //Upload photos to cloudinary
-        String folder = "booking/properties/" + savedProperty.getId();
-        for (int i = 0; i < photos.size(); i++) {
-            //implement main photo later
-            CloudinaryService.UploadResult res = cloudinaryService.uploadImage(photos.get(i), folder, "photo_" + i);
-            PropertyPhoto pp = new PropertyPhoto();
-            pp.setUrl(res.url());
-            pp.setPublicId(res.publicId());
-
-            savedProperty.addPropertyPhoto(pp);
-            if (mainIndex == i) {
-                // fix mainPhotoId
-                savedProperty.setMainPhotoUrl(res.url());
-            }
-        }
-
-        propertyRepo.save(savedProperty);
-    }
-
-    private static PropertyAddress getPropertyAddress(CreateApartmentRequest request, Country country, Property savedProperty) {
-        PropertyAddress address = new PropertyAddress();
-        address.setProperty(savedProperty);
-        address.setCountry(country);
-        address.setCity(request.address().city());
-        address.setPostcode(request.address().postCode());
-        address.setStreet(request.address().street());
-        address.setStreetNumber(request.address().streetNumber());
-        return address;
+        return new BedSummaryResult(bedCount, livingRoomCount, bedSummary);
     }
 }

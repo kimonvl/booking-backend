@@ -48,6 +48,9 @@ public class PropertyAddress extends AbstractEntity {
     @Column(name = "street_number", length = 32)
     private String streetNumber;
 
+    @Column(name = "floor_number", length = 10)
+    private String floorNumber;
+
     private Double lat;
     private Double lng;
 }

@@ -27,6 +27,10 @@ public record AddressDTO(
         // Optional but if present keep it clean
         @Size(max = 32, message = "{Size.addressDTO.streetNumber}")
         @Pattern(regexp = "^[0-9A-Za-z\\-\\/\\s]*$", message = "{Pattern.addressDTO.streetNumber}")
-        String streetNumber
+        String streetNumber,
+
+        @Size(max = 10, message = "{Size.addressDTO.floorNumber}")
+        @Pattern(regexp = "^[^\\p{Cntrl}]*$", message = "{Pattern.addressDTO.floorNumber}")
+        String floorNumber
 ) {
 }

@@ -1,7 +1,10 @@
 package com.booking.booking_clone_backend.services;
 
+import com.booking.booking_clone_backend.exceptions.EntityInvalidArgumentException;
+import com.booking.booking_clone_backend.exceptions.MediaUploadFailedException;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,13 +12,14 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class CloudinaryServiceImpl implements CloudinaryService{
     @Autowired
     private Cloudinary cloudinary;
 
     @Override
-    public UploadResult uploadImage(MultipartFile file, String folder, String name) {
+    public UploadResult uploadImage(MultipartFile file, String folder, String name) throws MediaUploadFailedException {
         try {
             Map<?, ?> result = cloudinary.uploader().upload(
                     file.getBytes(),
@@ -29,9 +33,11 @@ public class CloudinaryServiceImpl implements CloudinaryService{
             String secureUrl = (String) result.get("secure_url");
             String publicId = (String) result.get("public_id");
 
+            log.info("Image uploaded successfully with publicId={}", publicId);
             return new UploadResult(secureUrl, publicId);
         } catch (IOException e) {
-            throw new RuntimeException("Cloudinary upload failed for: " + file.getOriginalFilename(), e);
+            log.error("Image upload failed for folder={} and file name={}", folder, name);
+            throw new MediaUploadFailedException("Cloudinary upload failed for: " + file.getOriginalFilename());
         }
     }
 }

@@ -19,11 +19,11 @@ import lombok.*;
 public class Language extends AbstractEntity {
 
     @Id
-    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     // e.g. "en", "el", "fr"
+    @EqualsAndHashCode.Include
     @Column(nullable = false, unique = true, length = 16)
     private String code;
 
