@@ -11,7 +11,6 @@ import org.springframework.validation.Validator;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
@@ -80,7 +79,7 @@ public class CreateApartmentValidator implements Validator {
 
     private void validateLanguages(Errors errors, List<String> codes) {
         if (!errors.hasFieldErrors("languages")) {
-            List<String> normalized = getNormalisedStrings(codes);
+            List<String> normalized = ValidatorUtils.getNormalisedStrings(codes);
             if (normalized.isEmpty()) {
                 errors.rejectValue("languages", "languages.empty");
                 log.warn("Apartment creation failed. 0 languages provided");
@@ -102,7 +101,7 @@ public class CreateApartmentValidator implements Validator {
 
     private void validateAmenities(Errors errors, List<String> amenities) {
         if (!errors.hasFieldErrors("amenities")) {
-            List<String> normalized = getNormalisedStrings(amenities);
+            List<String> normalized = ValidatorUtils.getNormalisedStrings(amenities);
             if (normalized.isEmpty()) {
                 errors.rejectValue("amenities", "amenities.empty");
                 log.warn("Apartment creation failed. 0 amenities provided");
@@ -147,12 +146,5 @@ public class CreateApartmentValidator implements Validator {
         }
     }
 
-    private static List<String> getNormalisedStrings(List<String> strings) {
-        return strings.stream()
-                .filter(Objects::nonNull)
-                .map(String::trim)
-                .filter(s -> !s.isBlank())
-                .distinct()
-                .toList();
-    }
+
 }

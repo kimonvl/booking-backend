@@ -11,9 +11,11 @@ import com.booking.booking_clone_backend.models.property.Property;
 import com.booking.booking_clone_backend.repos.PropertyRepo;
 import com.booking.booking_clone_backend.repos.ReviewRepo;
 import com.booking.booking_clone_backend.repos.specifications.PropertySpecification;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class GuestApartmentServiceImpl implements GuestApartmentService{
     @Autowired
@@ -67,8 +70,8 @@ public class GuestApartmentServiceImpl implements GuestApartmentService{
                         summaryMap.getOrDefault(p.getId(), new ReviewSummaryDTO(0, 0))
                 ))
                 .toList();
-
-        return new org.springframework.data.domain.PageImpl<>(
+        log.info("Search completed with {} results", page.getTotalElements());
+        return new PageImpl<>(
                 dtoList,
                 page.getPageable(),
                 page.getTotalElements()

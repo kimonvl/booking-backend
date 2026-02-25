@@ -16,12 +16,12 @@ public record PropertySearchRequest(
         PropertyType type,
 
         @NotNull(message = "{NotNull.propertySearchRequest.minPrice}")
-        @DecimalMin(value = "0.0", inclusive = true, message = "{DecimalMin.propertySearchRequest.minPrice}")
+        @DecimalMin(value = "0.0", message = "{DecimalMin.propertySearchRequest.minPrice}")
         @Digits(integer = 10, fraction = 2, message = "{Digits.propertySearchRequest.minPrice}")
         BigDecimal minPrice,
 
         @NotNull(message = "{NotNull.propertySearchRequest.maxPrice}")
-        @DecimalMin(value = "0.0", inclusive = true, message = "{DecimalMin.propertySearchRequest.maxPrice}")
+        @DecimalMin(value = "0.0", message = "{DecimalMin.propertySearchRequest.maxPrice}")
         @Digits(integer = 10, fraction = 2, message = "{Digits.propertySearchRequest.maxPrice}")
         BigDecimal maxPrice,
 
