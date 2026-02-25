@@ -11,6 +11,7 @@ import com.booking.booking_clone_backend.models.property.Property;
 import com.booking.booking_clone_backend.repos.PropertyRepo;
 import com.booking.booking_clone_backend.repos.ReviewRepo;
 import com.booking.booking_clone_backend.repos.specifications.PropertySpecification;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,17 +25,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Slf4j
 @Service
-public class GuestApartmentServiceImpl implements GuestApartmentService{
-    @Autowired
-    ReviewService reviewService;
-    @Autowired
-    PropertyRepo propertyRepo;
-    @Autowired
-    ReviewRepo reviewRepo;
-    @Autowired
-    PropertyCustomMapper propertyCustomMapper;
+@RequiredArgsConstructor
+@Slf4j
+public class GuestPropertyServiceImpl implements GuestPropertyService {
+
+    private final ReviewService reviewService;
+
+    private final PropertyRepo propertyRepo;
+
+    private final ReviewRepo reviewRepo;
+
+    private final PropertyCustomMapper propertyCustomMapper;
 
 
 
@@ -86,5 +88,10 @@ public class GuestApartmentServiceImpl implements GuestApartmentService{
         }
         ReviewSummaryDTO reviewSummaryDTO = reviewService.getPropertyReviewSummary(propertyOpt.get().getId());
         return propertyCustomMapper.propertyToPropertyDetailsDTO(propertyOpt.get(), reviewSummaryDTO);
+    }
+
+    @Override
+    public boolean isPropertyExists(Long propertyId) {
+        return propertyRepo.existsById(propertyId);
     }
 }

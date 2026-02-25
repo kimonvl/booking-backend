@@ -33,7 +33,7 @@ import java.util.Map;
 @Service
 @AllArgsConstructor
 @Slf4j
-public class PartnerApartmentServiceImpl implements PartnerApartmentService {
+public class PartnerPropertyServiceImpl implements PartnerPropertyService {
 
     private final CloudinaryService cloudinaryService;
     private final PropertyRepo propertyRepo;

@@ -6,11 +6,11 @@ import com.booking.booking_clone_backend.DTOs.responses.property.PropertyShortDT
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 
-import java.util.List;
-
-public interface GuestApartmentService {
+public interface GuestPropertyService {
 
     Page<@NonNull PropertyShortDTO> search(PropertySearchRequest request);
 
     PropertyDetailsDTO getPropertyDetails(Long propertyId);
+
+    boolean isPropertyExists(Long propertyId);
 }

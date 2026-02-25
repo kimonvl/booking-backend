@@ -1,11 +1,27 @@
 package com.booking.booking_clone_backend.DTOs.requests.booking;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 
 public record CreateBookingRequest(
-        long propertyId,
+
+        @NotNull(message = "{NotNull.createBookingRequest.propertyId}")
+        Long propertyId,
+
+        @NotNull(message = "{NotNull.createBookingRequest.checkIn}")
         LocalDate checkIn,
+
+        @NotNull(message = "{NotNull.createBookingRequest.checkOut}")
         LocalDate checkOut,
-        int guestCount,
+
+        @NotNull(message = "{NotNull.createBookingRequest.guestCount}")
+        @Min(value = 1, message = "{Min.createBookingRequest.guestCount}")
+        Integer guestCount,
+
+        @NotNull(message = "{NotNull.createBookingRequest.checkOutDetails}")
+        @Valid
         CheckOutDetailsDTO checkOutDetails
-) {}
+) { }

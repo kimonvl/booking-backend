@@ -8,16 +8,19 @@ import com.booking.booking_clone_backend.controllers.controller_utils.ResponseFa
 import com.booking.booking_clone_backend.models.booking.Booking;
 import com.booking.booking_clone_backend.repos.BookingRepo;
 import com.booking.booking_clone_backend.services.BookingService;
+import com.booking.booking_clone_backend.validators.CreateBookingValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.Locale;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -25,8 +28,9 @@ import java.util.Locale;
 public class BookingController {
 
     private final BookingService bookingService;
-    private final MessageSource messageSource;
     private final BookingRepo bookingRepo;
+    private final CreateBookingValidator createBookingValidator;
+    private final MessageSource messageSource;
 
     @GetMapping("/{id}/status")
     public ResponseEntity<@NonNull GenericResponse<BookingStatusResponse>> getStatus(@PathVariable long id) {
@@ -40,15 +44,34 @@ public class BookingController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<@NonNull GenericResponse<Long>> createBooking(
+    public ResponseEntity<@NonNull GenericResponse<?>> createBooking(
             @Valid @RequestBody CreateBookingRequest request,
+            BindingResult bindingResult,
             Principal principal,
             Locale locale
     ) {
+        createBookingValidator.validate(request, bindingResult);
+        if (bindingResult.hasErrors()) {
+            Map<String, String> fieldErrors = bindingResult.getFieldErrors()
+                    .stream()
+                    .collect(java.util.stream.Collectors.toMap(
+                            org.springframework.validation.FieldError::getField,
+                            fe -> messageSource.getMessage(fe, locale),
+                            (msg1, msg2) -> msg1 // keep first if multiple
+                    ));
+            return new ResponseEntity<>(
+                    new GenericResponse<>(
+                            fieldErrors,
+                            messageSource.getMessage("booking.create.failed", null, "Failed to create booking", locale),
+                            false
+                    ),
+                    HttpStatus.BAD_REQUEST);
+        }
+
         return new ResponseEntity<>(
                 new GenericResponse<>(
                         bookingService.createBooking(request, principal.getName()),
-                        messageSource.getMessage("booking.created", null, MessageConstants.BOOKING_CREATED, locale),
+                        messageSource.getMessage("booking.create.success", null, MessageConstants.BOOKING_CREATED, locale),
                         true
                 ),
                 HttpStatus.CREATED

@@ -3,16 +3,14 @@ package com.booking.booking_clone_backend.controllers.guest;
 import com.booking.booking_clone_backend.DTOs.requests.guest.property.PropertySearchRequest;
 import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
 import com.booking.booking_clone_backend.DTOs.responses.property.PropertyDetailsDTO;
-import com.booking.booking_clone_backend.DTOs.responses.property.PropertyShortDTO;
 import com.booking.booking_clone_backend.constants.MessageConstants;
 import com.booking.booking_clone_backend.controllers.controller_utils.ResponseFactory;
-import com.booking.booking_clone_backend.services.GuestApartmentService;
+import com.booking.booking_clone_backend.services.GuestPropertyService;
 import com.booking.booking_clone_backend.validators.SearchFiltersValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.MessageSource;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -26,7 +24,7 @@ import java.util.Map;
 @RequestMapping("/guest/properties")
 public class GuestPropertiesController {
 
-    private final GuestApartmentService guestApartmentService;
+    private final GuestPropertyService guestPropertyService;
     private final SearchFiltersValidator searchFiltersValidator;
     private final MessageSource messageSource;
 
@@ -56,7 +54,7 @@ public class GuestPropertiesController {
 
         return new ResponseEntity<>(
                 new GenericResponse<>(
-                        guestApartmentService.search(request),
+                        guestPropertyService.search(request),
                         messageSource.getMessage("guest_property.search.succeeded", null, "Property search was successful", locale),
                         true
                         ),
@@ -67,7 +65,7 @@ public class GuestPropertiesController {
     public ResponseEntity<@NonNull GenericResponse<@NonNull PropertyDetailsDTO>> getPropertyDetails(@PathVariable Long propertyId) {
 
         return ResponseFactory.createResponse(
-                guestApartmentService.getPropertyDetails(propertyId),
+                guestPropertyService.getPropertyDetails(propertyId),
                 MessageConstants.PROPERTIES_FETCHED,
                 HttpStatus.OK,
                 true

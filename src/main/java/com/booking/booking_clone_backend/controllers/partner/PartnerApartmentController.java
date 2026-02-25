@@ -2,9 +2,8 @@ package com.booking.booking_clone_backend.controllers.partner;
 
 import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.CreateApartmentRequest;
 import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
-import com.booking.booking_clone_backend.models.property.Property;
 import com.booking.booking_clone_backend.models.user.UserPrincipal;
-import com.booking.booking_clone_backend.services.PartnerApartmentService;
+import com.booking.booking_clone_backend.services.PartnerPropertyService;
 import com.booking.booking_clone_backend.validators.CreateApartmentValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,15 +20,13 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 @RestController
 @RequestMapping("/partner/apartment")
 @RequiredArgsConstructor
 public class PartnerApartmentController {
 
-    private final PartnerApartmentService apartmentService;
+    private final PartnerPropertyService apartmentService;
     private final CreateApartmentValidator createApartmentValidator;
     private final MessageSource messageSource;
 
