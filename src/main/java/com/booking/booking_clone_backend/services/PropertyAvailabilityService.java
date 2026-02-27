@@ -1,9 +1,10 @@
 package com.booking.booking_clone_backend.services;
 
-import java.time.LocalDate;
+import com.booking.booking_clone_backend.models.booking.Booking;
+
 import java.util.List;
 
 public interface PropertyAvailabilityService {
-    boolean assertPropertyAvailability(Long propertyId, LocalDate checkIn, LocalDate checkOut);
+    void blockDatesForBooking(Booking booking);
     int deleteBlocksByBookingIds(List<Long> bookingIds);
 }
