@@ -1,7 +1,9 @@
 package com.booking.booking_clone_backend.exceptions;
 
-public class EntityNotFoundException extends RuntimeException {
-    public EntityNotFoundException(String message) {
-        super(message);
+public class EntityNotFoundException extends AppGenericException {
+    private static final String DEFAULT_CODE = "NotFound";
+
+    public EntityNotFoundException(String code, String message) {
+        super(code + DEFAULT_CODE, message);
     }
 }

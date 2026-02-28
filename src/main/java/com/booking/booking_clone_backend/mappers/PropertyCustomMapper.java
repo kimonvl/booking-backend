@@ -1,7 +1,7 @@
 package com.booking.booking_clone_backend.mappers;
 
 import com.booking.booking_clone_backend.DTOs.domain.BedSummaryResult;
-import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.CreateApartmentRequest;
+import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.CreatePropertyRequest;
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.amenity.AmenityDTO;
 import com.booking.booking_clone_backend.DTOs.responses.property.PropertyDetailsDTO;
 import com.booking.booking_clone_backend.DTOs.responses.property.PropertyShortDTO;
@@ -27,7 +27,7 @@ public class PropertyCustomMapper {
     private final ObjectMapper objectMapper;
 
     public Property createApartmentRequestToProperty(
-            CreateApartmentRequest request,
+            CreatePropertyRequest request,
             BedSummaryResult bedSummaryResult,
             User user
     ) throws JsonProcessingException {

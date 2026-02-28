@@ -26,6 +26,6 @@ public class ResponseFactory {
      * */
     public static <T> ResponseEntity<@NonNull GenericResponse<T>> createResponse(T data, String message, HttpStatus status, boolean success) {
         ResponseEntity.BodyBuilder builder = ResponseEntity.status(status);
-        return builder.body(new GenericResponse<>(data, message, success));
+        return builder.body(new GenericResponse<>(data, "Succeeded",message, success));
     }
 }

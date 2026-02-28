@@ -24,7 +24,7 @@ public class PropertyAvailabilityServiceImpl implements PropertyAvailabilityServ
 
     @Transactional(propagation = Propagation.MANDATORY)
     @Override
-    public void blockDatesForBooking(Booking booking) {
+    public void blockDatesForBooking(Booking booking) throws EntityInvalidArgumentException {
         LocalDate checkIn = booking.getCheckInDate();
         LocalDate checkOut = booking.getCheckOutDate();
 
@@ -42,7 +42,7 @@ public class PropertyAvailabilityServiceImpl implements PropertyAvailabilityServ
 
         } catch (DataIntegrityViolationException e) {
             if (isExclusionViolation(e)) {
-                throw new EntityInvalidArgumentException("booking.create.property.not_available");
+                throw new EntityInvalidArgumentException("BlockDates", "Failed to block dates: selected dates overlap with existing booking. propertyId=" + booking.getProperty().getId() + ", checkIn=" + checkIn + ", checkOut=" + checkOut);
             }
             log.error("Block dates failed: integrity violation. propertyId={}, checkIn={}, checkOut={}",
                     booking.getProperty().getId(), checkIn, checkOut, e);
@@ -55,15 +55,15 @@ public class PropertyAvailabilityServiceImpl implements PropertyAvailabilityServ
         return propertyAvailabilityRepo.deleteByBookingIds(bookingIds);
     }
 
-    private void validateDates(LocalDate checkIn, LocalDate checkOut) {
+    private void validateDates(LocalDate checkIn, LocalDate checkOut) throws EntityInvalidArgumentException {
         if (checkIn == null || checkOut == null) {
-            throw new EntityInvalidArgumentException("availability.dates.invalid");
+            throw new EntityInvalidArgumentException("ValidateDates", "Check-in and check-out dates must be provided");
         }
         if (!checkIn.isBefore(checkOut)) {
-            throw new EntityInvalidArgumentException("availability.dates.invalid");
+            throw new EntityInvalidArgumentException("ValidateDates", "Check-out date must be after check-in date");
         }
         if (checkIn.isBefore(LocalDate.now())) {
-            throw new EntityInvalidArgumentException("availability.dates.invalid");
+            throw new EntityInvalidArgumentException("ValidateDates", "Check-in date cannot be in the past");
         }
     }
 

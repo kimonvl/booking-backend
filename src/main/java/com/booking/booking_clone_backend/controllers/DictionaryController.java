@@ -23,33 +23,41 @@ public class DictionaryController {
 
     @GetMapping("/getAmenities")
     public ResponseEntity<@NonNull GenericResponse<List<AmenitiesDictionaryItemDTO>>> getAmenitiesDictionary() {
-        return ResponseFactory.createResponse(
-                dictionaryService.getAmenitiesDictionaryGroupByGroupName(),
-                MessageConstants.AMENITIES_DICTIONARY_FETCHED,
-                HttpStatus.ACCEPTED,
-                true
+        return new ResponseEntity<>(
+                new GenericResponse<>(
+                        dictionaryService.getAmenitiesDictionaryGroupByGroupName(),
+                        "AmenitiesDictionaryFetched",
+                        MessageConstants.AMENITIES_DICTIONARY_FETCHED,
+                        true
+                ),
+                HttpStatus.OK
         );
     }
 
     @GetMapping("/getLanguages")
     public ResponseEntity<@NonNull GenericResponse<List<LanguageDTO>>> getLanguageDictionary() {
-        return ResponseFactory.createResponse(
-                dictionaryService.getLanguageDictionary(),
-                MessageConstants.LANGUAGE_DICTIONARY_FETCHED,
-                HttpStatus.ACCEPTED,
-                true
+        return new ResponseEntity<>(
+                new GenericResponse<>(
+                        dictionaryService.getLanguageDictionary(),
+                        "LanguageDictionaryFetched",
+                        MessageConstants.LANGUAGE_DICTIONARY_FETCHED,
+                        true
+                ),
+                HttpStatus.OK
         );
     }
 
     @GetMapping("/getCountries")
     public ResponseEntity<@NonNull GenericResponse<List<CountryDTO>>> getCountryDictionary() {
-        return ResponseFactory.createResponse(
-                dictionaryService.getCountryDictionary(),
-                MessageConstants.COUNTRY_DICTIONARY_FETCHED,
-                HttpStatus.ACCEPTED,
-                true
+        return new ResponseEntity<>(
+                new GenericResponse<>(
+                        dictionaryService.getCountryDictionary(),
+                        "CountryDictionaryFetched",
+                        MessageConstants.COUNTRY_DICTIONARY_FETCHED,
+                        true
+                ),
+                HttpStatus.OK
         );
     }
-
 }
 

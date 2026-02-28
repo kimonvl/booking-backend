@@ -14,7 +14,6 @@ import com.booking.booking_clone_backend.repos.specifications.PropertySpecificat
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -31,11 +30,8 @@ import java.util.Optional;
 public class GuestPropertyServiceImpl implements GuestPropertyService {
 
     private final ReviewService reviewService;
-
     private final PropertyRepo propertyRepo;
-
     private final ReviewRepo reviewRepo;
-
     private final PropertyCustomMapper propertyCustomMapper;
 
 
@@ -81,13 +77,18 @@ public class GuestPropertyServiceImpl implements GuestPropertyService {
     }
 
     @Override
-    public PropertyDetailsDTO getPropertyDetails(Long propertyId) {
-        Optional<@NonNull Property> propertyOpt = propertyRepo.findById(propertyId);
-        if (propertyOpt.isEmpty()) {
-            throw new EntityNotFoundException(MessageConstants.PROPERTY_NOT_FOUND);
+    public PropertyDetailsDTO getPropertyDetails(Long propertyId) throws EntityNotFoundException {
+        Property property = null;
+        try {
+            property = propertyRepo.findById(propertyId)
+                    .orElseThrow(() -> new EntityNotFoundException("GetDetailsProperty", "Property not found with id: " + propertyId));
+
+            ReviewSummaryDTO reviewSummaryDTO = reviewService.getPropertyReviewSummary(property.getId());
+            return propertyCustomMapper.propertyToPropertyDetailsDTO(property, reviewSummaryDTO);
+        } catch (EntityNotFoundException e) {
+            log.error("Failed to get property details for id={}", propertyId, e);
+            throw e;
         }
-        ReviewSummaryDTO reviewSummaryDTO = reviewService.getPropertyReviewSummary(propertyOpt.get().getId());
-        return propertyCustomMapper.propertyToPropertyDetailsDTO(propertyOpt.get(), reviewSummaryDTO);
     }
 
     @Override

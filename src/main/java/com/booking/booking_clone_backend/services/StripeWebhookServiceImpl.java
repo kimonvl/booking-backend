@@ -1,5 +1,6 @@
 package com.booking.booking_clone_backend.services;
 
+import com.booking.booking_clone_backend.exceptions.InternalErrorException;
 import com.booking.booking_clone_backend.models.booking.BookingStatus;
 import com.booking.booking_clone_backend.models.booking.PaymentStatus;
 import com.booking.booking_clone_backend.repos.BookingRepo;
@@ -7,14 +8,15 @@ import com.stripe.exception.EventDataObjectDeserializationException;
 import com.stripe.model.Event;
 import com.stripe.model.PaymentIntent;
 import com.stripe.model.StripeObject;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StripeWebhookServiceImpl implements StripeWebhookService{
@@ -23,8 +25,8 @@ public class StripeWebhookServiceImpl implements StripeWebhookService{
     private final BookingRepo bookingRepo;
 
     @Override
-    @Transactional
-    public void handleEvent(Event event) {
+    @Transactional(rollbackFor = {InternalErrorException.class})
+    public void handleEvent(Event event) throws InternalErrorException {
         switch (event.getType()) {
             case "payment_intent.succeeded" -> handlePaymentSucceeded(event);
             case "payment_intent.payment_failed" -> handlePaymentFailed(event);
@@ -35,49 +37,54 @@ public class StripeWebhookServiceImpl implements StripeWebhookService{
     }
 
 
-    private void handlePaymentSucceeded(Event event) {
-        System.out.println("Payment succeeded");
-
+    private void handlePaymentSucceeded(Event event) throws InternalErrorException {
         StripeObject stripeObject = null;
         try {
             stripeObject = event.getDataObjectDeserializer().deserializeUnsafe();
+
+            if (!(stripeObject instanceof PaymentIntent intent)) {
+                log.error("Unexpected Stripe object type in handlePaymentSuccess. eventId={}, eventType={}, objectType={}", event.getId(), event.getType(), stripeObject.getClass().getName());
+                throw new InternalErrorException("HandlePaymentSuccessObjectType", "Unexpected Stripe object type in handlePaymentSuccess. eventId=" + event.getId() + ", eventType=" + event.getType() + ", objectType=" + stripeObject.getClass().getName());
+            }
+
+
+            bookingRepo.findByPaymentIntentId(intent.getId())
+                    .ifPresent(booking -> {
+                        if (booking.getPaymentStatus() == PaymentStatus.SUCCEEDED) return;
+
+                        booking.setPaymentStatus(PaymentStatus.SUCCEEDED);
+                        booking.setStatus(BookingStatus.CONFIRMED);
+                        booking.setPaidAt(Instant.now());
+                        bookingRepo.save(booking);
+                        log.info("Booking with id={} has been confirmed", booking.getId());
+                    });
         } catch (EventDataObjectDeserializationException e) {
-            throw new RuntimeException(e);
+            log.error("Failed to deserialize event data object in handlePaymentSuccess. eventId={}, eventType={}", event.getId(), event.getType(), e);
+            throw new InternalErrorException("HandlePaymentSuccessDeserialization", "Failed to deserialize event data object for event with id=" + event.getId() + " and type=" + event.getType());
         }
-
-        if (!(stripeObject instanceof PaymentIntent intent)) {
-            System.out.println("⚠️ Not a PaymentIntent. Was: " + stripeObject.getClass().getName());
-            return;
-        }
-
-        System.out.println("Payment succeeded " + intent.getId());
-
-        bookingRepo.findByPaymentIntentId(intent.getId())
-                .ifPresent(booking -> {
-                    if (booking.getPaymentStatus() == PaymentStatus.SUCCEEDED) return;
-
-                    booking.setPaymentStatus(PaymentStatus.SUCCEEDED);
-                    booking.setStatus(BookingStatus.CONFIRMED);
-                    booking.setPaidAt(Instant.now());
-                    bookingRepo.save(booking);
-                });
     }
 
-    private void handlePaymentFailed(Event event) {
-        PaymentIntent intent = (PaymentIntent) event.getDataObjectDeserializer()
-                .getObject()
-                .orElse(null);
-        System.out.println("Payment failed");
-        if (intent == null) return;
-        System.out.println("Payment failed " + intent.getId());
+    private void handlePaymentFailed(Event event) throws InternalErrorException {
+        StripeObject stripeObject = null;
+        try {
+            stripeObject = event.getDataObjectDeserializer().deserializeUnsafe();
 
-        bookingRepo.findByPaymentIntentId(intent.getId())
-                .ifPresent(booking -> {
-                    if (booking.getPaymentStatus() == PaymentStatus.SUCCEEDED) return;
-                    booking.setPaymentStatus(PaymentStatus.FAILED);
-                    booking.setStatus(BookingStatus.CANCELLED);
-                    propertyAvailabilityService.deleteBlocksByBookingIds(List.of(booking.getId()));
-                    bookingRepo.save(booking);
-                });
+            if (!(stripeObject instanceof PaymentIntent intent)) {
+                log.error("Unexpected Stripe object type in handlePaymentFailed. eventId={}, eventType={}, objectType={}", event.getId(), event.getType(), stripeObject.getClass().getName());
+                throw new InternalErrorException("HandlePaymentFailedObjectType", "Unexpected Stripe object type in handlePaymentSuccess. eventId=" + event.getId() + ", eventType=" + event.getType() + ", objectType=" + stripeObject.getClass().getName());
+            }
+
+            bookingRepo.findByPaymentIntentId(intent.getId())
+                    .ifPresent(booking -> {
+                        if (booking.getPaymentStatus() == PaymentStatus.SUCCEEDED) return;
+                        booking.setPaymentStatus(PaymentStatus.FAILED);
+                        booking.setStatus(BookingStatus.CANCELLED);
+                        propertyAvailabilityService.deleteBlocksByBookingIds(List.of(booking.getId()));
+                        bookingRepo.save(booking);
+                    });
+        } catch (EventDataObjectDeserializationException e) {
+            log.error("Failed to deserialize event data object in handlePaymentFailed. eventId={}, eventType={}", event.getId(), event.getType(), e);
+            throw new InternalErrorException("HandlePaymentFailedDeserialization", "Failed to deserialize event data object for event with id=" + event.getId() + " and type=" + event.getType());
+        }
     }
 }

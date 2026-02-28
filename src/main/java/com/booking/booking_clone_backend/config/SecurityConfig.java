@@ -6,7 +6,7 @@ import com.booking.booking_clone_backend.services.MyUserDetailsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,16 +38,12 @@ import java.util.List;
  */
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Autowired
-    private JwtAuthFilter jwtAuthFilter;
-
-    @Autowired
-    private MyUserDetailsService userDetailsService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final JwtAuthFilter jwtAuthFilter;
+    private final MyUserDetailsService userDetailsService;
+    private final ObjectMapper objectMapper;
 
     @Value("${app.cors.allowed-origin}")
     private String allowedOrigin;
@@ -67,14 +63,18 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .anonymous(AbstractHttpConfigurer::disable)
                 .exceptionHandling(ex -> ex
                         // Not authenticated -> 401
                         .authenticationEntryPoint((req, res, e) -> {
+                            Object authException = req.getAttribute(JwtAuthFilter.AUTH_EXCEPTION_ATTR);
+                            String code = authException == null ? "UNAUTHORIZED" : "INVALID_ACCESS_TOKEN";
+                            String message = authException == null
+                                    ? "Authentication required."
+                                    : "Access token is invalid or expired.";
                             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             res.setContentType("application/json");
                             res.getWriter().write(objectMapper.writeValueAsString(
-                                    new GenericResponse<>(null, "UNAUTHORIZED", false)
+                                    new GenericResponse<>(null, code, message, false)
                             ));
                         })
                         // Authenticated but forbidden -> 403
@@ -82,7 +82,7 @@ public class SecurityConfig {
                             res.setStatus(HttpServletResponse.SC_FORBIDDEN);
                             res.setContentType("application/json");
                             res.getWriter().write(objectMapper.writeValueAsString(
-                                    new GenericResponse<>(null, "FORBIDDEN", false)
+                                    new GenericResponse<>(null, "FORBIDDEN", "Access denied.", false)
                             ));
                         })
                 )

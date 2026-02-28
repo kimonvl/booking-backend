@@ -49,6 +49,8 @@ public class MessageConstants {
     public static final String INVALID_COUNTRY_CODE = "Invalid country code";
     public static final String OPERATIONS_TABLE_FETCHED = "Operations table fetched successfully";
     public static final String PROPERTIES_FETCHED = "Properties fetched successfully";
+    public static final String PROPERTY_DETAILS_FETCHED = "Property details fetched successfully";
+    public static final String PROPERTY_CREATED = "Property created successfully";
     public static final String PROPERTY_NOT_FOUND = "Property not found";
     public static final String PROPERTY_AVAILABILITY = "Property is not available this period of time";
     public static final String BOOKING_CREATED = "Booking created. Proceed to payment to confirm it const.";

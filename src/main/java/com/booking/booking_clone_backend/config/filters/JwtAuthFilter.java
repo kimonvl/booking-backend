@@ -9,11 +9,14 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -25,11 +28,13 @@ import java.io.IOException;
  * Authorization: Bearer <token>
  */
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
-    @Autowired
-    private JwtService jwtService;
-    @Autowired
-    private MyUserDetailsService userDetailsService;
+    public static final String AUTH_EXCEPTION_ATTR = "auth_exception";
+
+    private final JwtService jwtService;
+    private final MyUserDetailsService userDetailsService;
 
     /**
      * Processes the request attempting to extract and validate the jwt, granting access in case of a valid token,
@@ -42,7 +47,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
      * @throws IOException      if I/O errors occur during filtering
      * */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain chain)
             throws ServletException, IOException {
 
         // Already authenticated
@@ -70,10 +75,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(auth);
 
-        } catch (Exception ex) {
-            // invalid/expired -> treat as unauthenticated
-            chain.doFilter(request, response);
-            return;
+        } catch (JwtException | UsernameNotFoundException ex) {
+            // Invalid/expired token (or stale user) -> leave request unauthenticated.
+            SecurityContextHolder.clearContext();
+            request.setAttribute(AUTH_EXCEPTION_ATTR, ex);
+            log.warn("Authentication failed: invalid or expired token. Details: {}", ex.getMessage());
         }
         chain.doFilter(request, response);
     }

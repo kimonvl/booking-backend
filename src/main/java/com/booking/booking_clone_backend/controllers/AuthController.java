@@ -4,9 +4,9 @@ import com.booking.booking_clone_backend.DTOs.requests.auth.LoginRequest;
 import com.booking.booking_clone_backend.DTOs.requests.auth.RegisterRequest;
 import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
 import com.booking.booking_clone_backend.DTOs.responses.auth.AuthResponse;
+import com.booking.booking_clone_backend.DTOs.responses.user.UserDTO;
 import com.booking.booking_clone_backend.constants.MessageConstants;
-import com.booking.booking_clone_backend.controllers.controller_utils.ResponseFactory;
-import com.booking.booking_clone_backend.exceptions.EntityInvalidArgumentException;
+import com.booking.booking_clone_backend.exceptions.*;
 import com.booking.booking_clone_backend.services.AuthServiceImpl;
 import com.booking.booking_clone_backend.validators.RegisterValidator;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.util.Locale;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -47,33 +46,19 @@ public class AuthController {
     private long refreshDays;
 
     @PostMapping("/register")
-    public ResponseEntity<@NonNull GenericResponse<?>> register(
+    public ResponseEntity<@NonNull GenericResponse<UserDTO>> register(
             @Valid @RequestBody RegisterRequest req,
             BindingResult bindingResult,
             Locale locale
-    ) {
+    ) throws EntityInvalidArgumentException, EntityAlreadyExistsException, ValidationException {
         registerValidator.validate(req, bindingResult);
-
         if (bindingResult.hasErrors()) {
-            Map<String, String> fieldErrors = bindingResult.getFieldErrors()
-                    .stream()
-                    .collect(java.util.stream.Collectors.toMap(
-                            org.springframework.validation.FieldError::getField,
-                            fe -> messageSource.getMessage(fe, locale),
-                            (msg1, msg2) -> msg1 // keep first if multiple
-                    ));
-            return new ResponseEntity<>(
-                    new GenericResponse<>(
-                            fieldErrors,
-                            messageSource.getMessage("auth.register.failed", null, MessageConstants.REGISTERED_FAILED, locale),
-                            false
-                    ),
-                    HttpStatus.BAD_REQUEST);
-
+            throw new ValidationException("RegisterRequest", "Validation failed for registration request", bindingResult);
         }
         return new ResponseEntity<>(
                 new GenericResponse<>(
                         authService.register(req),
+                        "RegisterSucceeded",
                         messageSource.getMessage("auth.register.succeeded", null, MessageConstants.REGISTERED, locale),
                         true
                 ),
@@ -84,18 +69,23 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<@NonNull GenericResponse<AuthResponse>> login(
             @Valid @RequestBody LoginRequest req,
+            BindingResult bindingResult,
             HttpServletResponse response,
             Locale locale
-    ) {
+    ) throws EntityInvalidArgumentException, InternalErrorException, EntityNotFoundException, ValidationException {
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException("LoginRequest", "Validation failed for login request", bindingResult);
+        }
         var result = authService.login(req);
         setRefreshCookie(response, result.refreshToken());
         return new ResponseEntity<>(
                 new GenericResponse<>(
                         new AuthResponse(result.accessToken(), result.userDTO()),
+                        "LoginSucceeded",
                         messageSource.getMessage("auth.login.succeeded", null, MessageConstants.LOGGED_IN, locale),
                         true
                 ),
-                HttpStatus.ACCEPTED);
+                HttpStatus.OK);
     }
 
     /**
@@ -107,9 +97,9 @@ public class AuthController {
             @CookieValue(name = REFRESH_COOKIE, required = false) String refreshToken,
             HttpServletResponse response,
             Locale locale
-    ) {
+    ) throws EntityInvalidArgumentException, EntityNotFoundException {
         if (refreshToken == null || refreshToken.isBlank()) {
-            throw new EntityInvalidArgumentException("auth.refresh_token.not_found");
+            throw new EntityInvalidArgumentException("EmptyRefreshToken", "Refresh token is missing from cookie");
         }
 
         try {
@@ -118,36 +108,37 @@ public class AuthController {
             return new ResponseEntity<>(
                     new GenericResponse<>(
                             new AuthResponse(result.accessToken(), result.userDTO()),
+                            "TokenRefreshSucceeded",
                             messageSource.getMessage("auth.refresh.succeeded", null, MessageConstants.TOKEN_REFRESHED, locale),
                             true
                     ),
                     HttpStatus.ACCEPTED);
-        } catch (Exception e) {
+        } catch (EntityInvalidArgumentException | EntityNotFoundException e) {
             clearRefreshCookie(response);
             throw e;
         }
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<@NonNull GenericResponse<Object>> logout(
+    public ResponseEntity<@NonNull GenericResponse<?>> logout(
             @CookieValue(name = REFRESH_COOKIE, required = false) String refreshToken,
             HttpServletResponse response,
             Locale locale
-    ) {
+    ) throws EntityNotFoundException {
         try {
             if (refreshToken != null && !refreshToken.isBlank()) {
                 authService.logout(refreshToken);
             }
             clearRefreshCookie(response);
-            System.out.println("logging out");
             return new ResponseEntity<>(
                     new GenericResponse<>(
                             null,
+                            "LogoutSucceeded",
                             messageSource.getMessage("auth.logout.succeeded", null, MessageConstants.LOGGED_OUT, locale),
                             true
                     ),
                     HttpStatus.OK);
-        } catch (Exception e) {
+        } catch (EntityNotFoundException e) {
             clearRefreshCookie(response);
             throw e;
         }

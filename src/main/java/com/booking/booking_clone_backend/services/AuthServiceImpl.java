@@ -26,7 +26,6 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HexFormat;
-import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -46,18 +45,17 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional(rollbackFor = {EntityAlreadyExistsException.class, EntityInvalidArgumentException.class})
-    public UserDTO register(RegisterRequest req) {
+    public UserDTO register(RegisterRequest req) throws EntityAlreadyExistsException, EntityInvalidArgumentException {
         try {
             String normalized = req.email().trim().toLowerCase();
             if (userRepo.existsByEmailIgnoreCase(normalized)) {
-                throw new EntityAlreadyExistsException("User with email=" + normalized + " already exists");
+                throw new EntityAlreadyExistsException("RegisterUser", "User with email=" + normalized + " already exists");
             }
 
-            Optional<Country> countryOpt = countryRepo.findByCode(req.country());
-            if (countryOpt.isEmpty())
-                throw new EntityInvalidArgumentException("Country code=" + req.country() + " invalid");
+            Country country = countryRepo.findByCode(req.country())
+                    .orElseThrow(() -> new EntityInvalidArgumentException("RegisterCountry", "Country code=" + req.country() + " invalid"));
 
-            User u = userMapper.registerRequestToUser(req, normalized, passwordEncoder.encode(req.password()), countryOpt.get());
+            User u = userMapper.registerRequestToUser(req, normalized, passwordEncoder.encode(req.password()), country);
 
             log.info("User with email={} registered successfully", normalized);
             return userMapper.toDto(userRepo.save(u));
@@ -73,8 +71,8 @@ public class AuthServiceImpl implements AuthService {
         }
     }
     @Override
-    @Transactional(rollbackFor = {AuthenticationException.class, WrongCredentialsException.class})
-    public AuthResult login(LoginRequest request) {
+    @Transactional(rollbackFor = {AuthenticationException.class, EntityInvalidArgumentException.class, InternalErrorException.class})
+    public AuthResult login(LoginRequest request) throws EntityInvalidArgumentException, InternalErrorException, EntityNotFoundException {
         try {
             var auth = authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.email(), request.password())
@@ -82,11 +80,15 @@ public class AuthServiceImpl implements AuthService {
 
             var principal = (UserPrincipal) auth.getPrincipal();
             if (principal == null) {
-                throw new WrongCredentialsException("auth.wrong_credentials");
+                log.error("Login failed for email={}, principal not found", request.email());
+                throw new InternalErrorException("Login", "Login failed for email=" + request.email() + " due to unexpected system error");
             }
+            // TODO check role from db not request
             User user = principal.user();
-            if (!user.getRole().equals(request.role()))
-                throw new WrongCredentialsException("auth.wrong_credentials");
+            if (!user.getRole().equals(request.role())) {
+                log.error("Login failed for email={}, role={}", request.email(), request.role());
+                throw new EntityInvalidArgumentException("LoginRole", "Login failed. Role mismatch for email=" + request.email());
+            }
             String access = jwtService.generateAccessToken(
                     principal.getId(),
                     principal.getUsername(),
@@ -98,12 +100,12 @@ public class AuthServiceImpl implements AuthService {
             return new AuthResult(access, refresh.getToken(), userMapper.toDto(user));
         } catch (AuthenticationException e) {
             log.warn("Login failed: bad credentials email={}", request.email(), e);
-            throw new WrongCredentialsException("auth.wrong_credentials");
-        } catch (WrongCredentialsException e) {
+            throw e;
+        } catch (EntityInvalidArgumentException e) {
             log.warn("Login failed: role mismatch for email={}", request.email(), e);
             throw e;
-        } catch (Exception e) {
-            log.error("Login failed: unexpected system error", e);
+        } catch (InternalErrorException e) {
+            log.error("Login failed: unexpected system error for email={}", request.email(), e);
             throw e;
         }
     }
@@ -114,10 +116,10 @@ public class AuthServiceImpl implements AuthService {
     {
         try {
             RefreshToken existing = refreshRepo.findByToken(refreshTokenValue)
-                    .orElseThrow(() -> new EntityNotFoundException("auth.refresh_token.not_found"));
+                    .orElseThrow(() -> new EntityNotFoundException("RefreshToken", "Refresh token not found"));
 
             if (existing.isRevoked() || existing.getExpiresAt().isBefore(Instant.now())) {
-                throw new EntityInvalidArgumentException("auth.refresh_token.expired");
+                throw new EntityInvalidArgumentException("RefreshToken", "Refresh token is expired or revoked");
             }
 
             // rotate refresh token
@@ -136,17 +138,14 @@ public class AuthServiceImpl implements AuthService {
         } catch (EntityInvalidArgumentException e) {
             log.warn("Refresh failed: Refresh token is expired", e);
             throw e;
-        } catch (Exception e) {
-            log.error("Refresh failed: Unexpected system error", e);
-            throw e;
         }
-}
+    }
     @Override
     @Transactional(rollbackFor = {EntityNotFoundException.class})
     public void logout(String refreshTokenValue) throws EntityNotFoundException {
         try {
             RefreshToken token = refreshRepo.findByToken(refreshTokenValue)
-                    .orElseThrow(() -> new EntityNotFoundException("auth.logout.refresh_token.not_found"));
+                    .orElseThrow(() -> new EntityNotFoundException("LogoutToken", "Refresh token not found"));
 
             token.setRevoked(true);
             refreshRepo.save(token);
@@ -154,16 +153,13 @@ public class AuthServiceImpl implements AuthService {
         } catch (EntityNotFoundException e) {
             log.warn("Logout failed: Refresh token not found", e);
             throw e;
-        } catch (Exception e) {
-            log.error("Logout failed: Unexpected system error", e);
-            throw e;
         }
     }
 
     private RefreshToken issueRefreshToken(String email) throws  EntityNotFoundException{
         try {
             User user = userRepo.findByEmailIgnoreCase(email)
-                    .orElseThrow(() -> new EntityNotFoundException("auth.refresh_token.user.not_found"));
+                    .orElseThrow(() -> new EntityNotFoundException("IssueRefreshUser", "User not found for email=" + email));
 
             byte[] bytes = new byte[32];
             random.nextBytes(bytes);

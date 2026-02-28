@@ -3,7 +3,8 @@ package com.booking.booking_clone_backend.services;
 import com.booking.booking_clone_backend.models.user.User;
 import com.booking.booking_clone_backend.models.user.UserPrincipal;
 import com.booking.booking_clone_backend.repos.UserRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,12 +20,11 @@ import java.util.Optional;
  * to Spring Security's {@link UserDetails} contract using {@link UserPrincipal}</p>
  * */
 @Service
+@RequiredArgsConstructor
 public class MyUserDetailsService implements UserDetailsService {
 
     // Repos
-    @Autowired
-    UserRepo userRepo;
-
+    private final UserRepo userRepo;
     /**
      * Loads the user identified by the given username (email)
      *
@@ -32,8 +32,9 @@ public class MyUserDetailsService implements UserDetailsService {
      * @return a fully populated {@link UserDetails} instance
      * @throws UsernameNotFoundException if the user doesn't exist
      * */
+    @NonNull
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(@NonNull String username) throws UsernameNotFoundException {
         Optional<User> userOpt = userRepo.findByEmailIgnoreCase(username);
         if (userOpt.isEmpty())
             throw new UsernameNotFoundException("Email not found");

@@ -12,21 +12,20 @@ import com.booking.booking_clone_backend.models.static_data.Country;
 import com.booking.booking_clone_backend.repos.AmenitiesRepo;
 import com.booking.booking_clone_backend.repos.CountryRepo;
 import com.booking.booking_clone_backend.repos.LanguageRepo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class DictionaryServiceImpl implements DictionaryService{
-    @Autowired
-    AmenitiesRepo amenitiesRepo;
-    @Autowired
-    LanguageRepo languageRepo;
-    @Autowired
-    CountryRepo countryRepo;
-    @Autowired
-    DictionaryMapper dictionaryMapper;
+
+    private final AmenitiesRepo amenitiesRepo;
+    private final LanguageRepo languageRepo;
+    private final CountryRepo countryRepo;
+    private final DictionaryMapper dictionaryMapper;
 
     @Override
     public List<AmenitiesDictionaryItemDTO> getAmenitiesDictionaryGroupByGroupName() {

@@ -2,6 +2,9 @@ package com.booking.booking_clone_backend.controllers;
 
 import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
 import com.booking.booking_clone_backend.controllers.controller_utils.ResponseFactory;
+import com.booking.booking_clone_backend.exceptions.EntityInvalidArgumentException;
+import com.booking.booking_clone_backend.exceptions.EntityNotFoundException;
+import com.booking.booking_clone_backend.exceptions.InternalErrorException;
 import com.booking.booking_clone_backend.services.StripePaymentService;
 import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
@@ -25,22 +28,16 @@ public class PaymentController {
     @PostMapping("/create-intent")
     public ResponseEntity<@NonNull GenericResponse<String>> createIntent(
             @RequestBody Long bookingId,
-            Principal principal,
-            Locale locale
-    ) {
-        String res = null;
-        try {
-            res = stripePaymentService.createPaymentIntent(bookingId, principal.getName());
-        } catch (StripeException e) {
-            return new ResponseEntity<>(
+            Principal principal
+    ) throws EntityInvalidArgumentException, EntityNotFoundException, InternalErrorException {
+        return new ResponseEntity<>(
                 new GenericResponse<>(
-                    null,
-                    messageSource.getMessage("payment.create_intent.failed", null, "Payment failed", locale),
-                    false
+                        stripePaymentService.createPaymentIntent(bookingId, principal.getName()),
+                        "CreateIntentSucceeded",
+                        "Payment intent created successfully.",
+                        true
                 ),
-                HttpStatus.BAD_GATEWAY
-            );
-        }
-        return ResponseFactory.createResponse(res, "payment.create_intent.succeeded", HttpStatus.OK, true);
+                HttpStatus.CREATED
+        );
     }
 }

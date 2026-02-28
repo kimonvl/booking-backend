@@ -19,7 +19,9 @@ import lombok.NoArgsConstructor;
 public class GenericResponse<T> {
     /** Payload data returned by the response */
     private T data;
-    /** Message directed to the user describing the result */
+    /** Code representing the type of response, useful for client-side handling */
+    private String code;
+    /** Server message */
     private String message;
     /** Flag indicating whether the operation was successful */
     private boolean success;

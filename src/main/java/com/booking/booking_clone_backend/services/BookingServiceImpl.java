@@ -35,27 +35,27 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public Long createBooking(CreateBookingRequest request, String userEmail) {
+    public Long createBooking(CreateBookingRequest request, String userEmail) throws EntityNotFoundException, EntityInvalidArgumentException {
         try {
             User user = userRepo.findByEmailIgnoreCase(userEmail)
-                    .orElseThrow(() -> new EntityNotFoundException("booking.create.user.not_found"));
+                    .orElseThrow(() -> new EntityNotFoundException("CreateBookingUser", "user email not found. userEmail=" + userEmail));
 
             Property property = propertyRepo.findById(request.propertyId())
-                    .orElseThrow(() -> new EntityNotFoundException("booking.create.property.not_found"));
+                    .orElseThrow(() -> new EntityNotFoundException("CreateBookingProperty", "property not found. propertyId=" + request.propertyId()));
 
             Integer maxGuests = property.getMaxGuests();
             Integer guestCount = request.guestCount();
             if (maxGuests != null && guestCount != null && guestCount > maxGuests) {
-                throw new EntityInvalidArgumentException("booking.create.guest_count.greater");
+                throw new EntityInvalidArgumentException("CreateBookingGuestCount", "guestCount exceeds maxGuests. propertyId=" + request.propertyId() + ", guestCount=" + guestCount + ", maxGuests=" + maxGuests);
             }
 
             if (property.getPricePerNight() == null) {
-                throw new EntityInvalidArgumentException("booking.create.property.not_priced");
+                throw new EntityInvalidArgumentException("CreateBookingPrice", "property price per night is not set. propertyId=" + request);
             }
 
             long nightsLong = ChronoUnit.DAYS.between(request.checkIn(), request.checkOut());
             if (nightsLong <= 0) {
-                throw new EntityInvalidArgumentException("availability.dates.invalid");
+                throw new EntityInvalidArgumentException("CreateBookingDates", "check-out date must be after check-in date. propertyId=" + request.propertyId() + ", checkIn=" + request.checkIn() + ", checkOut=" + request.checkOut());
             }
 
             BigDecimal total = BigDecimal.valueOf(nightsLong).multiply(property.getPricePerNight());
@@ -68,47 +68,23 @@ public class BookingServiceImpl implements BookingService {
 
             Booking savedBooking = bookingRepo.save(booking);
 
+            // check availability and block dates for the booking
             propertyAvailabilityService.blockDatesForBooking(savedBooking);
 
             log.info("Booking created successfully. propertyId={}, bookingId={}", request.propertyId(), savedBooking.getId());
             return savedBooking.getId();
 
-        } catch (EntityNotFoundException e) {
-            switch (e.getMessage()) {
-                case "booking.create.user.not_found" ->
-                        log.warn("Create booking failed: guest email not found. userEmail={}", userEmail);
-                case "booking.create.property.not_found" ->
-                        log.warn("Create booking failed: property not found. propertyId={}", request.propertyId());
-                default ->
-                        log.warn("Create booking failed: not found. code={}, propertyId={}, userEmail={}",
-                                e.getMessage(), request.propertyId(), userEmail);
-            }
-            throw e;
-
-        } catch (EntityInvalidArgumentException e) {
-            switch (e.getMessage()) {
-                case "booking.create.guest_count.greater" ->
-                        log.warn("Create booking failed: guestCount={} exceeds maxGuests for propertyId={}",
-                                request.guestCount(), request.propertyId());
-                case "availability.dates.invalid" ->
-                        log.warn("Create booking failed: Invalid range. checkIn={} and checkOut={}",
-                                request.checkIn(), request.checkOut());
-                case "booking.create.property.not_available" ->
-                        log.warn("Create booking failed: Property not available. propertyId={}, checkIn={}, checkOut={}",
-                                request.propertyId(), request.checkIn(), request.checkOut());
-                default ->
-                        log.warn("Create booking failed: invalid argument. code={}, propertyId={}",
-                                e.getMessage(), request.propertyId());
-            }
+        } catch (EntityNotFoundException | EntityInvalidArgumentException e) {
+            log.warn("Failed to create booking. propertyId={}, userEmail={}. Message: {}",request.propertyId(), userEmail, e.getMessage());
             throw e;
         }
     }
 
     @Override
-    public void deleteBooking(Long bookingId) {
+    public void deleteBooking(Long bookingId) throws EntityNotFoundException {
         try {
             Booking booking = bookingRepo.findById(bookingId)
-                    .orElseThrow(() -> new EntityNotFoundException("booking.delete.not_found"));
+                    .orElseThrow(() -> new EntityNotFoundException("DeleteBooking", "Failed to delete booking: booking not found. bookingId=" + bookingId));
             bookingRepo.delete(booking);
             log.info("Booking deleted. bookingId={}", bookingId);
         } catch (EntityNotFoundException e) {

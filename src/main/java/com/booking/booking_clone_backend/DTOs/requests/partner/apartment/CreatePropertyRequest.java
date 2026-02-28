@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.List;
 
-public record CreateApartmentRequest(
+public record CreatePropertyRequest(
         @NotBlank(message = "{NotBlank.createApartmentRequest.propertyName}")
         @Size(min = 3, max = 200, message = "{Size.createApartmentRequest.propertyName}")
 

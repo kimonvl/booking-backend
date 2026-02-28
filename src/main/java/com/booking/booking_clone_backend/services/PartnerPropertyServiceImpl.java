@@ -3,11 +3,12 @@ package com.booking.booking_clone_backend.services;
 import com.booking.booking_clone_backend.DTOs.domain.BedSummaryResult;
 import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.BedType;
 import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.BedroomDTO;
-import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.CreateApartmentRequest;
+import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.CreatePropertyRequest;
 import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.SleepingAreasDTO;
 import com.booking.booking_clone_backend.DTOs.responses.property.AddressDTO;
 import com.booking.booking_clone_backend.exceptions.EntityInvalidArgumentException;
-import com.booking.booking_clone_backend.exceptions.MediaUploadFailedException;
+import com.booking.booking_clone_backend.exceptions.FileUploadException;
+import com.booking.booking_clone_backend.exceptions.InternalErrorException;
 import com.booking.booking_clone_backend.mappers.PropertyCustomMapper;
 import com.booking.booking_clone_backend.models.static_data.Amenity;
 import com.booking.booking_clone_backend.models.property.PropertyAmenity;
@@ -43,7 +44,9 @@ public class PartnerPropertyServiceImpl implements PartnerPropertyService {
     private final PropertyCustomMapper propertyCustomMapper;
 
     @Override
-    public void addApartment(CreateApartmentRequest request, List<MultipartFile> photos, Integer mainIndex, User user) {
+    public void createProperty(CreatePropertyRequest request, List<MultipartFile> photos, Integer mainIndex, User user)
+            throws FileUploadException, EntityInvalidArgumentException, InternalErrorException
+    {
         try {
             BedSummaryResult result = getBedSummaryResult(request.sleepingAreas());
             Property savedProperty = propertyRepo.save(propertyCustomMapper.createApartmentRequestToProperty(request, result, user));
@@ -62,41 +65,35 @@ public class PartnerPropertyServiceImpl implements PartnerPropertyService {
 
             log.info("Property created successfully with id={}", savedProperty.getId());
             propertyRepo.save(savedProperty);
-        } catch (EntityInvalidArgumentException e) {
-            log.warn("Property creation failed for user with email ={}.", user.getEmail(), e);
-            throw e;
-        } catch (MediaUploadFailedException e) {
-            log.warn("Property creation failed during media upload.", e);
+        } catch (EntityInvalidArgumentException | FileUploadException e) {
+            log.warn("Property creation failed for user with email ={}. Message={}", user.getEmail(), e.getMessage());
             throw e;
         } catch (JsonProcessingException e) {
             log.error("Property creation failed during json processing.");
-            throw new RuntimeException(e);
+            throw new InternalErrorException("CreateApartmentJsonProcessing", "Failed to create apartment due to json processing error.");
         }
     }
 
-    private void addPhotos(List<MultipartFile> photos, Integer mainIndex, Property savedProperty) throws MediaUploadFailedException {
-        try {
-            String folder = "booking/properties/" + savedProperty.getId();
-            for (int i = 0; i < photos.size(); i++) {
-                CloudinaryService.UploadResult res = cloudinaryService.uploadImage(photos.get(i), folder, "photo_" + i);
-                PropertyPhoto pp = new PropertyPhoto();
-                pp.setUrl(res.url());
-                pp.setPublicId(res.publicId());
+    private void addPhotos(List<MultipartFile> photos, Integer mainIndex, Property savedProperty) throws FileUploadException {
+        String folder = "booking/properties/" + savedProperty.getId();
+        for (int i = 0; i < photos.size(); i++) {
+            CloudinaryService.UploadResult res = cloudinaryService.uploadImage(photos.get(i), folder, "photo_" + i);
+            PropertyPhoto pp = new PropertyPhoto();
+            pp.setUrl(res.url());
+            pp.setPublicId(res.publicId());
 
-                savedProperty.addPropertyPhoto(pp);
-                if (mainIndex == i) {
-                    savedProperty.setMainPhotoUrl(res.url());
-                }
+            savedProperty.addPropertyPhoto(pp);
+            if (mainIndex == i) {
+                savedProperty.setMainPhotoUrl(res.url());
             }
-        } catch (MediaUploadFailedException e) {
-            throw new MediaUploadFailedException("partner_apartment.create_apartment.photos.upload_failed");
         }
+
     }
 
     private void addLanguages(List<String> languageCodes, Property savedProperty) throws EntityInvalidArgumentException {
         List<Language> languages = languageRepo.findByCodeInIgnoreCase(languageCodes);
         if (languages.isEmpty())
-            throw new EntityInvalidArgumentException("partner_apartment.create_apartment.languages.empty");
+            throw new EntityInvalidArgumentException("CreateApartmentLanguage", "Failed to create apartment. No valid languages provided.");
         for (Language lang : languages) {
             PropertyLanguage pl = new PropertyLanguage();
             pl.setLanguage(lang);
@@ -110,7 +107,7 @@ public class PartnerPropertyServiceImpl implements PartnerPropertyService {
     private void addAmenities(List<String> amenityCodes, Property savedProperty) throws EntityInvalidArgumentException{
         List<Amenity> amenities = amenitiesRepo.findByCodeIn(amenityCodes);
         if (amenities.isEmpty())
-            throw new EntityInvalidArgumentException("partner_apartment.create_apartment.amenities.empty");
+            throw new EntityInvalidArgumentException("CreateApartmentAmenity", "Failed to create apartment. No valid amenities provided.");
         for (Amenity amenity : amenities) {
             PropertyAmenity pa = new PropertyAmenity();
             pa.setAmenity(amenity);
@@ -122,7 +119,7 @@ public class PartnerPropertyServiceImpl implements PartnerPropertyService {
 
     private void addAddress(AddressDTO address, Property savedProperty) throws EntityInvalidArgumentException {
         Country country = countryRepo.findByCode(address.country())
-                .orElseThrow(() -> new EntityInvalidArgumentException("partner_apartment.create_apartment.country.not_found"));
+                .orElseThrow(() -> new EntityInvalidArgumentException("CreateApartmentCountry", "Failed to create apartment. Invalid country code provided: " + address.country()));
 
         PropertyAddress pa = getPropertyAddress(address, country, savedProperty);
         savedProperty.setAddress(pa);

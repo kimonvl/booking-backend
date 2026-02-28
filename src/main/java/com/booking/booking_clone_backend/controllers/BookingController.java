@@ -5,6 +5,9 @@ import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
 import com.booking.booking_clone_backend.DTOs.responses.booking.BookingStatusResponse;
 import com.booking.booking_clone_backend.constants.MessageConstants;
 import com.booking.booking_clone_backend.controllers.controller_utils.ResponseFactory;
+import com.booking.booking_clone_backend.exceptions.EntityInvalidArgumentException;
+import com.booking.booking_clone_backend.exceptions.EntityNotFoundException;
+import com.booking.booking_clone_backend.exceptions.ValidationException;
 import com.booking.booking_clone_backend.models.booking.Booking;
 import com.booking.booking_clone_backend.repos.BookingRepo;
 import com.booking.booking_clone_backend.services.BookingService;
@@ -32,6 +35,7 @@ public class BookingController {
     private final CreateBookingValidator createBookingValidator;
     private final MessageSource messageSource;
 
+    // TODO move find booking status to booking service
     @GetMapping("/{id}/status")
     public ResponseEntity<@NonNull GenericResponse<BookingStatusResponse>> getStatus(@PathVariable long id) {
         Booking b = bookingRepo.findById(id).orElseThrow();
@@ -47,31 +51,18 @@ public class BookingController {
     public ResponseEntity<@NonNull GenericResponse<?>> createBooking(
             @Valid @RequestBody CreateBookingRequest request,
             BindingResult bindingResult,
-            Principal principal,
-            Locale locale
-    ) {
+            Principal principal
+    ) throws ValidationException, EntityInvalidArgumentException, EntityNotFoundException {
         createBookingValidator.validate(request, bindingResult);
         if (bindingResult.hasErrors()) {
-            Map<String, String> fieldErrors = bindingResult.getFieldErrors()
-                    .stream()
-                    .collect(java.util.stream.Collectors.toMap(
-                            org.springframework.validation.FieldError::getField,
-                            fe -> messageSource.getMessage(fe, locale),
-                            (msg1, msg2) -> msg1 // keep first if multiple
-                    ));
-            return new ResponseEntity<>(
-                    new GenericResponse<>(
-                            fieldErrors,
-                            messageSource.getMessage("booking.create.failed", null, "Failed to create booking", locale),
-                            false
-                    ),
-                    HttpStatus.BAD_REQUEST);
+            throw new ValidationException("CreateBookingRequest", "Invalid booking data", bindingResult);
         }
 
         return new ResponseEntity<>(
                 new GenericResponse<>(
                         bookingService.createBooking(request, principal.getName()),
-                        messageSource.getMessage("booking.create.success", null, MessageConstants.BOOKING_CREATED, locale),
+                        "CreateBookingSucceeded",
+                        "Booking created successfully",
                         true
                 ),
                 HttpStatus.CREATED
@@ -79,19 +70,20 @@ public class BookingController {
 
     }
 
+    // TODO change endpoint to DELETE
     @PostMapping("/cancel/{bookingId}")
     public ResponseEntity<@NonNull GenericResponse<?>> cancelBooking(
-            @PathVariable Long bookingId,
-            Locale locale
-    ) {
+            @PathVariable Long bookingId
+    ) throws EntityNotFoundException {
         bookingService.deleteBooking(bookingId);
         return new ResponseEntity<>(
                 new GenericResponse<>(
                         null,
-                        messageSource.getMessage("booking.deleted", null, MessageConstants.BOOKING_DELETED, locale),
+                        "DeleteBookingSucceeded",
+                        "Booking deleted successfully",
                         true
                 ),
-                HttpStatus.CREATED
+                HttpStatus.NO_CONTENT
         );
 
     }
