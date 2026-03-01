@@ -101,7 +101,7 @@ public class SecurityConfig {
 
                         // Guest endpoints are public
                         .requestMatchers(HttpMethod.GET, "/guest/properties/details/{propertyId}").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/guest/properties/search").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/guest/properties/search").permitAll()
                         // Partner endpoints require specific capabilities
                         .requestMatchers(HttpMethod.POST, "/partner/properties/create").hasAuthority(CapabilityEnum.CREATE_PROPERTY.name())
                         .requestMatchers(HttpMethod.GET, "/partner/primary-account/operations-table").hasAuthority(CapabilityEnum.VIEW_STATISTICS.name())
