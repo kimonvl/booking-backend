@@ -1,16 +1,20 @@
--- Needed so we can use "=" on bigint in a GiST exclusion constraint
+-- V2 kept for exclusion constraint only.
+-- Core table/column creation now happens in V1.
+
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 
--- Basic validity
-ALTER TABLE property_availability
-    ADD CONSTRAINT chk_availability_date_order
-    CHECK (start_date < end_date);
-
--- No overlap per property:
--- daterange(start_date, end_date, '[)') => end date is exclusive
-ALTER TABLE property_availability
-    ADD CONSTRAINT ex_availability_no_overlap
-    EXCLUDE USING gist (
-        property_id WITH =,
-        daterange(start_date, end_date, '[)') WITH &&
-    );
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'ex_availability_no_overlap'
+    ) THEN
+        ALTER TABLE property_availability
+            ADD CONSTRAINT ex_availability_no_overlap
+            EXCLUDE USING gist (
+                property_id WITH =,
+                daterange(start_date, end_date, '[)') WITH &&
+            );
+    END IF;
+END $$;
