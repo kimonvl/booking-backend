@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/partner/primaryAccount")
+@RequestMapping("/partner/primary-account")
 @RequiredArgsConstructor
 public class PrimaryAccountDashboardController {
     private final PrimaryAccountService primaryAccountService;
 
-    @GetMapping("/getOperationsTable")
+    @GetMapping("/operations-table")
     public ResponseEntity<@NonNull GenericResponse<List<PropertyOperationRowDTO>>> getOperationsTable(
             @AuthenticationPrincipal User principal
     ) throws EntityNotFoundException {
@@ -37,7 +37,7 @@ public class PrimaryAccountDashboardController {
         );
     }
 
-    @GetMapping("/getSummaryTiles")
+    @GetMapping("/summary-tiles")
     public ResponseEntity<@NonNull GenericResponse<List<SummaryTileDTO>>> getSummaryTiles(
             @AuthenticationPrincipal User principal
     ) throws EntityNotFoundException {

@@ -2,6 +2,7 @@ package com.booking.booking_clone_backend.config;
 
 import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
 import com.booking.booking_clone_backend.config.filters.JwtAuthFilter;
+import com.booking.booking_clone_backend.models.user.CapabilityEnum;
 import com.booking.booking_clone_backend.services.MyUserDetailsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.DispatcherType;
@@ -99,15 +100,25 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
 
                         // Guest endpoints are public
-                        .requestMatchers("/guest/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/guest/properties/details/{propertyId}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/guest/properties/search").permitAll()
+                        // Partner endpoints require specific capabilities
+                        .requestMatchers(HttpMethod.POST, "/partner/properties/create").hasAuthority(CapabilityEnum.CREATE_PROPERTY.name())
+                        .requestMatchers(HttpMethod.GET, "/partner/primary-account/operations-table").hasAuthority(CapabilityEnum.VIEW_STATISTICS.name())
+                        .requestMatchers(HttpMethod.GET, "/partner/primary-account/summary-tiles").hasAuthority(CapabilityEnum.VIEW_STATISTICS.name())
+
+                        // Booking endpoints
+                        .requestMatchers(HttpMethod.GET, "/bookings/{id}/status").hasAuthority(CapabilityEnum.VIEW_BOOKING.name())
+                        .requestMatchers(HttpMethod.POST, "/bookings/create").hasAuthority(CapabilityEnum.CREATE_BOOKING.name())
+                        .requestMatchers(HttpMethod.POST, "/bookings/delete/{bookingId}").hasAuthority(CapabilityEnum.DELETE_BOOKING.name())
+
+                        // Payment endpoints
+                        .requestMatchers(HttpMethod.POST, "/payments/create-intent").hasAuthority(CapabilityEnum.CREATE_PAYMENT.name())
 
                         // Dictionary endpoints are public
-                        .requestMatchers("/dictionary/**").permitAll()
+                        .requestMatchers("/dictionaries/**").permitAll()
 
                         .requestMatchers("/stripe/webhook").permitAll()
-
-                        // Partner area requires PARTNER role
-                        .requestMatchers("/partner/**").hasRole("PARTNER")
 
                         // Everything else requires being authenticated
                         .anyRequest().authenticated()

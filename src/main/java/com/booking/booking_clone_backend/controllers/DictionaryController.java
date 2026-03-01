@@ -18,11 +18,11 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/dictionary")
+@RequestMapping("/dictionaries")
 public class DictionaryController {
     private final DictionaryService dictionaryService;
 
-    @GetMapping("/getAmenities")
+    @GetMapping("/amenities")
     public ResponseEntity<@NonNull GenericResponse<List<AmenitiesDictionaryItemDTO>>> getAmenitiesDictionary() {
         return new ResponseEntity<>(
                 new GenericResponse<>(
@@ -35,7 +35,7 @@ public class DictionaryController {
         );
     }
 
-    @GetMapping("/getLanguages")
+    @GetMapping("/languages")
     public ResponseEntity<@NonNull GenericResponse<List<LanguageDTO>>> getLanguageDictionary() {
         return new ResponseEntity<>(
                 new GenericResponse<>(
@@ -48,7 +48,7 @@ public class DictionaryController {
         );
     }
 
-    @GetMapping("/getCountries")
+    @GetMapping("/countries")
     public ResponseEntity<@NonNull GenericResponse<List<CountryDTO>>> getCountryDictionary() {
         return new ResponseEntity<>(
                 new GenericResponse<>(
@@ -60,7 +60,7 @@ public class DictionaryController {
                 HttpStatus.OK
         );
     }
-
+    // feels bad to expose all roles in permitAll() endpoint, but we need it for the frontend to know which role id corresponds to which role name when assigning roles to users
     @GetMapping("/roles")
     public ResponseEntity<@NonNull GenericResponse<List<RoleDTO>>> getRoleDictionary() {
         return new ResponseEntity<>(

@@ -24,15 +24,15 @@ import java.util.List;
 
 // TODO change endpoint to /partner/properties and add update endpoint
 @RestController
-@RequestMapping("/partner/apartment")
+@RequestMapping("/partner/properties")
 @RequiredArgsConstructor
 public class PartnerPropertyController {
 
     private final PartnerPropertyService apartmentService;
     private final CreateApartmentValidator createApartmentValidator;
 
-    @PostMapping(value = "/addApartment", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<@NonNull GenericResponse<?>> addApartment(
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<@NonNull GenericResponse<?>> createProperty(
             @Valid @RequestPart(value = "data") CreatePropertyRequest req,
             BindingResult bindingResult,
             @RequestPart(value = "photos") List<MultipartFile> photos,

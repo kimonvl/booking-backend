@@ -33,7 +33,6 @@ public class BookingController {
     private final BookingService bookingService;
     private final BookingRepo bookingRepo;
     private final CreateBookingValidator createBookingValidator;
-    private final MessageSource messageSource;
 
     // TODO move find booking status to booking service
     @GetMapping("/{id}/status")
@@ -70,9 +69,8 @@ public class BookingController {
 
     }
 
-    // TODO change endpoint to DELETE
-    @PostMapping("/cancel/{bookingId}")
-    public ResponseEntity<@NonNull GenericResponse<?>> cancelBooking(
+    @PostMapping("/delete/{bookingId}")
+    public ResponseEntity<@NonNull GenericResponse<?>> deleteBooking(
             @PathVariable Long bookingId
     ) throws EntityNotFoundException {
         bookingService.deleteBooking(bookingId);

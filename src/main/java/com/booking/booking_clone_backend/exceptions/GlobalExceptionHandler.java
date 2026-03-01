@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
 
         Map<String, String> errors = new HashMap<>();
         for (FieldError filedError : bindingResult.getFieldErrors()) {
-            errors.put(filedError.getField(), filedError.getDefaultMessage());
+            errors.put(filedError.getField(), filedError.getCode());
         }
 
         return new ResponseEntity<>(new GenericResponse<>(errors, e.getCode(), e.getMessage(), false),

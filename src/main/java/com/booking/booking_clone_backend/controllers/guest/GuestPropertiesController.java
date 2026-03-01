@@ -52,7 +52,7 @@ public class GuestPropertiesController {
                 HttpStatus.OK);
     }
 
-    @GetMapping("/getPropertyDetails/{propertyId}")
+    @GetMapping("/details/{propertyId}")
     public ResponseEntity<@NonNull GenericResponse<@NonNull PropertyDetailsDTO>> getPropertyDetails(@PathVariable Long propertyId) throws EntityNotFoundException {
 
         return new ResponseEntity<>(
