@@ -4,14 +4,17 @@ import com.booking.booking_clone_backend.DTOs.responses.dictionaries.amenity.Ame
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.amenity.AmenityDTO;
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.country.CountryDTO;
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.language.LanguageDTO;
+import com.booking.booking_clone_backend.DTOs.responses.dictionaries.role.RoleDTO;
 import com.booking.booking_clone_backend.mappers.DictionaryMapper;
 import com.booking.booking_clone_backend.models.static_data.Amenity;
 import com.booking.booking_clone_backend.models.static_data.AmenityGroup;
 import com.booking.booking_clone_backend.models.static_data.Language;
 import com.booking.booking_clone_backend.models.static_data.Country;
+import com.booking.booking_clone_backend.models.user.Role;
 import com.booking.booking_clone_backend.repos.AmenitiesRepo;
 import com.booking.booking_clone_backend.repos.CountryRepo;
 import com.booking.booking_clone_backend.repos.LanguageRepo;
+import com.booking.booking_clone_backend.repos.RoleRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,7 @@ public class DictionaryServiceImpl implements DictionaryService{
     private final LanguageRepo languageRepo;
     private final CountryRepo countryRepo;
     private final DictionaryMapper dictionaryMapper;
+    private final RoleRepo roleRepo;
 
     @Override
     public List<AmenitiesDictionaryItemDTO> getAmenitiesDictionaryGroupByGroupName() {
@@ -53,6 +57,12 @@ public class DictionaryServiceImpl implements DictionaryService{
     public List<CountryDTO> getCountryDictionary() {
         List<Country> countries = countryRepo.findAll();
         return dictionaryMapper.countriesToDtoList(countries);
+    }
+
+    @Override
+    public List<RoleDTO> getRoleDictionary() {
+        List<Role> roles = roleRepo.findAll();
+        return dictionaryMapper.rolesToDtoList(roles);
     }
 
     @Override

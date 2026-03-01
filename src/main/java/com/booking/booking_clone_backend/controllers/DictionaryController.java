@@ -4,6 +4,7 @@ import com.booking.booking_clone_backend.DTOs.responses.GenericResponse;
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.amenity.AmenitiesDictionaryItemDTO;
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.country.CountryDTO;
 import com.booking.booking_clone_backend.DTOs.responses.dictionaries.language.LanguageDTO;
+import com.booking.booking_clone_backend.DTOs.responses.dictionaries.role.RoleDTO;
 import com.booking.booking_clone_backend.constants.MessageConstants;
 import com.booking.booking_clone_backend.controllers.controller_utils.ResponseFactory;
 import com.booking.booking_clone_backend.services.DictionaryService;
@@ -52,6 +53,19 @@ public class DictionaryController {
         return new ResponseEntity<>(
                 new GenericResponse<>(
                         dictionaryService.getCountryDictionary(),
+                        "CountryDictionaryFetched",
+                        MessageConstants.COUNTRY_DICTIONARY_FETCHED,
+                        true
+                ),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/roles")
+    public ResponseEntity<@NonNull GenericResponse<List<RoleDTO>>> getRoleDictionary() {
+        return new ResponseEntity<>(
+                new GenericResponse<>(
+                        dictionaryService.getRoleDictionary(),
                         "CountryDictionaryFetched",
                         MessageConstants.COUNTRY_DICTIONARY_FETCHED,
                         true
