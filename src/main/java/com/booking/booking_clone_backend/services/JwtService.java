@@ -1,6 +1,5 @@
 package com.booking.booking_clone_backend.services;
 
-import com.booking.booking_clone_backend.models.user.Role;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +10,6 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -28,7 +26,7 @@ public class JwtService {
         this.accessMinutes = accessMinutes;
     }
 
-    public String generateAccessToken(long userId, String email, Role role) {
+    public String generateAccessToken(long userId, String email, String role) {
         Instant now = Instant.now();
         Instant exp = now.plusSeconds(accessMinutes * 60);
 
@@ -36,7 +34,7 @@ public class JwtService {
                 .subject(email)
                 .claims(Map.of(
                         "uid", userId,
-                        "role", role.name()
+                        "role", role
                 ))
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(exp))

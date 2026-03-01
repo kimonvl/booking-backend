@@ -34,7 +34,7 @@ public interface ReviewRepo extends JpaRepository<@NonNull Review, @NonNull Long
           new com.booking.booking_clone_backend.DTOs.responses.user.UserDTO(
             g.id,
             g.email,
-            g.role,
+            g.role.id,
             g.firstName,
             g.lastName,
             g.country.code)

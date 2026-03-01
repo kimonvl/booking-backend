@@ -1,6 +1,6 @@
 package com.booking.booking_clone_backend.DTOs.responses.user;
 
-import com.booking.booking_clone_backend.models.user.Role;
+import com.booking.booking_clone_backend.models.user.RoleEnum;
 import com.booking.booking_clone_backend.models.user.User;
 
 /**
@@ -14,8 +14,10 @@ public record UserDTO (
     // Email that the user registered with
     String email,
     //Guest or Partner
-    Role role,
+    Long roleId,
     String firstName,
     String lastName,
     String country
-){}
+) {
+
+}

@@ -6,6 +6,17 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -16,7 +27,7 @@ import org.hibernate.type.SqlTypes;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(name = "users",
         indexes = @Index(name = "idx_users_email", columnList = "email", unique = true))
-public class User extends AbstractEntity {
+public class User extends AbstractEntity implements UserDetails {
     @Id
     @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,10 +39,11 @@ public class User extends AbstractEntity {
     @Column(nullable = false)
     private String passwordHash;
 
-    @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(name = "role", columnDefinition = "role_enum", nullable = false)
-    private Role role = Role.GUEST;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+
+    // TODO move the above to personal info table and make it one-to-one with user
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_code", referencedColumnName = "code", nullable = false)
     private Country country;
@@ -44,4 +56,25 @@ public class User extends AbstractEntity {
 
     @Column(nullable = false)
     private boolean enabled = true;
+
+    @NullMarked
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        Set<GrantedAuthority> grantedAuthorities =  new HashSet<>();
+        grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+        role.getCapabilities()
+                .forEach(capability -> grantedAuthorities.add(new SimpleGrantedAuthority(capability.getName())));
+        return grantedAuthorities;
+    }
+
+    @Override
+    public @Nullable String getPassword() {
+        return passwordHash;
+    }
+
+    @NullMarked
+    @Override
+    public String getUsername() {
+        return email;
+    }
 }

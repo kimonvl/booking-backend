@@ -7,10 +7,11 @@ import com.booking.booking_clone_backend.exceptions.*;
 import com.booking.booking_clone_backend.mappers.UserMapper;
 import com.booking.booking_clone_backend.models.static_data.Country;
 import com.booking.booking_clone_backend.models.refresh_token.RefreshToken;
+import com.booking.booking_clone_backend.models.user.Role;
 import com.booking.booking_clone_backend.models.user.User;
-import com.booking.booking_clone_backend.models.user.UserPrincipal;
 import com.booking.booking_clone_backend.repos.CountryRepo;
 import com.booking.booking_clone_backend.repos.RefreshTokenRepo;
+import com.booking.booking_clone_backend.repos.RoleRepo;
 import com.booking.booking_clone_backend.repos.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ import java.util.HexFormat;
 @Service
 public class AuthServiceImpl implements AuthService {
     private final UserRepo userRepo;
+    private final RoleRepo roleRepo;
     private final CountryRepo countryRepo;
     private final UserMapper userMapper;
     private final RefreshTokenRepo refreshRepo;
@@ -51,11 +53,13 @@ public class AuthServiceImpl implements AuthService {
             if (userRepo.existsByEmailIgnoreCase(normalized)) {
                 throw new EntityAlreadyExistsException("RegisterUser", "User with email=" + normalized + " already exists");
             }
-
             Country country = countryRepo.findByCode(req.country())
                     .orElseThrow(() -> new EntityInvalidArgumentException("RegisterCountry", "Country code=" + req.country() + " invalid"));
-
+            // TODO ADD ROLE REOPOSITORY AND CHECK ROLE EXISTS AND ADD ROLE TO USER
+            Role role = roleRepo.findById(req.roleId())
+                    .orElseThrow(() -> new EntityInvalidArgumentException("RegisterRole", "Role id=" + req.roleId() + " invalid"));
             User u = userMapper.registerRequestToUser(req, normalized, passwordEncoder.encode(req.password()), country);
+            role.addUser(u);
 
             log.info("User with email={} registered successfully", normalized);
             return userMapper.toDto(userRepo.save(u));
@@ -63,10 +67,7 @@ public class AuthServiceImpl implements AuthService {
             log.error("Registration failed for email={}. Email already exists", req.email(), e);
             throw e;
         } catch (EntityInvalidArgumentException e) {
-            log.error("Registration failed for email={}. Country code={} invalid", req.email(), req.country(), e);
-            throw e;
-        } catch (Exception e) {
-            log.error("Register failed: unexpected system error", e);
+            log.error("Registration failed for email={}. Message={}", req.email(), e.getMessage(), e);
             throw e;
         }
     }
@@ -78,26 +79,26 @@ public class AuthServiceImpl implements AuthService {
                     new UsernamePasswordAuthenticationToken(request.email(), request.password())
             );
 
-            var principal = (UserPrincipal) auth.getPrincipal();
+            var principal = (User) auth.getPrincipal();
             if (principal == null) {
                 log.error("Login failed for email={}, principal not found", request.email());
                 throw new InternalErrorException("Login", "Login failed for email=" + request.email() + " due to unexpected system error");
             }
             // TODO check role from db not request
-            User user = principal.user();
-            if (!user.getRole().equals(request.role())) {
-                log.error("Login failed for email={}, role={}", request.email(), request.role());
+
+            if (!principal.getRole().getId().equals(request.roleId())) {
+                log.error("Login failed for email={}, role={}", request.email(), request.roleId());
                 throw new EntityInvalidArgumentException("LoginRole", "Login failed. Role mismatch for email=" + request.email());
             }
             String access = jwtService.generateAccessToken(
                     principal.getId(),
                     principal.getUsername(),
-                    principal.getRole()
+                    principal.getRole().getName()
             );
 
             RefreshToken refresh = issueRefreshToken(principal.getUsername());
             log.info("Login succeeded: user with email={} authenticated", request.email());
-            return new AuthResult(access, refresh.getToken(), userMapper.toDto(user));
+            return new AuthResult(access, refresh.getToken(), userMapper.toDto(principal));
         } catch (AuthenticationException e) {
             log.warn("Login failed: bad credentials email={}", request.email(), e);
             throw e;
@@ -127,7 +128,7 @@ public class AuthServiceImpl implements AuthService {
             refreshRepo.save(existing);
 
             User user = existing.getUser();
-            String access = jwtService.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
+            String access = jwtService.generateAccessToken(user.getId(), user.getEmail(), user.getRole().getName());
             RefreshToken newRefresh = issueRefreshToken(user.getEmail());
 
             log.info("Refresh and access token issued for user with email={}", user.getEmail());

@@ -5,7 +5,7 @@ import com.booking.booking_clone_backend.DTOs.responses.partner.primary_account.
 import com.booking.booking_clone_backend.DTOs.responses.partner.primary_account.SummaryTileDTO;
 import com.booking.booking_clone_backend.constants.MessageConstants;
 import com.booking.booking_clone_backend.exceptions.EntityNotFoundException;
-import com.booking.booking_clone_backend.models.user.UserPrincipal;
+import com.booking.booking_clone_backend.models.user.User;
 import com.booking.booking_clone_backend.services.PrimaryAccountService;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -24,7 +24,7 @@ public class PrimaryAccountDashboardController {
 
     @GetMapping("/getOperationsTable")
     public ResponseEntity<@NonNull GenericResponse<List<PropertyOperationRowDTO>>> getOperationsTable(
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal User principal
     ) throws EntityNotFoundException {
         return new ResponseEntity<>(
                 new GenericResponse<>(
@@ -39,7 +39,7 @@ public class PrimaryAccountDashboardController {
 
     @GetMapping("/getSummaryTiles")
     public ResponseEntity<@NonNull GenericResponse<List<SummaryTileDTO>>> getSummaryTiles(
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal User principal
     ) throws EntityNotFoundException {
         return new ResponseEntity<>(
                 new GenericResponse<>(
