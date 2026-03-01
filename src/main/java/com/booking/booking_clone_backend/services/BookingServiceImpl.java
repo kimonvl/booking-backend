@@ -33,8 +33,8 @@ public class BookingServiceImpl implements BookingService {
     private final BookingCustomMapper bookingCustomMapper;
     private final BookingCheckoutDetailsMapper bookingCheckoutDetailsMapper;
 
-    @Transactional
     @Override
+    @Transactional(rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class})
     public Long createBooking(CreateBookingRequest request, String userEmail) throws EntityNotFoundException, EntityInvalidArgumentException {
         try {
             User user = userRepo.findByEmailIgnoreCase(userEmail)
@@ -81,6 +81,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(rollbackFor = {EntityNotFoundException.class})
     public void deleteBooking(Long bookingId) throws EntityNotFoundException {
         try {
             Booking booking = bookingRepo.findById(bookingId)

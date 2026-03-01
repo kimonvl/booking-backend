@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
@@ -44,6 +45,7 @@ public class PartnerPropertyServiceImpl implements PartnerPropertyService {
     private final PropertyCustomMapper propertyCustomMapper;
 
     @Override
+    @Transactional(rollbackFor = {FileUploadException.class, EntityInvalidArgumentException.class, InternalErrorException.class})
     public void createProperty(CreatePropertyRequest request, List<MultipartFile> photos, Integer mainIndex, User user)
             throws FileUploadException, EntityInvalidArgumentException, InternalErrorException
     {

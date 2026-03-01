@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -34,13 +35,13 @@ public class PrimaryAccountServiceImpl implements PrimaryAccountService{
     private final AddressMapper addressMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<PropertyOperationRowDTO> getOperationsTable(String userEmail) throws EntityNotFoundException {
         User owner = null;
         try {
             owner = userRepo.findByEmailIgnoreCase(userEmail)
                     .orElseThrow(() -> new EntityNotFoundException("OperationsTableUser", "User with email " + userEmail + " not found"));
 
-            List<PropertyOperationRowDTO> propertyOperationTable = new ArrayList<>();
             List<Property> properties = propertyRepo.findByOwner(owner);
 
             var from = LocalDate.now();
@@ -60,31 +61,7 @@ public class PrimaryAccountServiceImpl implements PrimaryAccountService{
                     from,
                     to
             );
-            for (Property property : properties) {
-                Long arrivalsCount = 0L;
-                Long departuresCount = 0L;
-                // Find the property's row of the grouped by property results, if exists
-                var arrivals = arrivalsNext48.stream().filter((row) -> row.getPropertyId() == property.getId()).toList();
-                var departures = departuresNext48.stream().filter((row) -> row.getPropertyId() == property.getId()).toList();
-                if (!arrivals.isEmpty()){
-                    arrivalsCount = arrivals.getFirst().getCount();
-                }
-                if (!departures.isEmpty()){
-                    departuresCount = departures.getFirst().getCount();
-                }
-                // TODO add guestMessages and bookingMessages
-                PropertyOperationRowDTO propertyOperationRowDTO = new PropertyOperationRowDTO(
-                        property.getId(),
-                        property.getName(),
-                        addressMapper.toDto(property.getAddress()),
-                        property.getStatus(),
-                        arrivalsCount,
-                        departuresCount,
-                        0L,
-                        0L
-                );
-                propertyOperationTable.add(propertyOperationRowDTO);
-            }
+            List<PropertyOperationRowDTO> propertyOperationTable = extractRows(properties, arrivalsNext48, departuresNext48);
 
             log.debug("Successfully retrieved operations table for user with email {}: {} entries",
                     userEmail, propertyOperationTable.size());
@@ -96,7 +73,38 @@ public class PrimaryAccountServiceImpl implements PrimaryAccountService{
         }
     }
 
+    private List<PropertyOperationRowDTO> extractRows(List<Property> properties, List<BookingRepo.PropertyCountRow> arrivalsNext48, List<BookingRepo.PropertyCountRow> departuresNext48) {
+        List<PropertyOperationRowDTO> propertyOperationTable = new ArrayList<>();
+        for (Property property : properties) {
+            Long arrivalsCount = 0L;
+            Long departuresCount = 0L;
+            // Find the property's row of the grouped by property results, if exists
+            var arrivals = arrivalsNext48.stream().filter((row) -> row.getPropertyId() == property.getId()).toList();
+            var departures = departuresNext48.stream().filter((row) -> row.getPropertyId() == property.getId()).toList();
+            if (!arrivals.isEmpty()){
+                arrivalsCount = arrivals.getFirst().getCount();
+            }
+            if (!departures.isEmpty()){
+                departuresCount = departures.getFirst().getCount();
+            }
+            // TODO add guestMessages and bookingMessages
+            PropertyOperationRowDTO propertyOperationRowDTO = new PropertyOperationRowDTO(
+                    property.getId(),
+                    property.getName(),
+                    addressMapper.toDto(property.getAddress()),
+                    property.getStatus(),
+                    arrivalsCount,
+                    departuresCount,
+                    0L,
+                    0L
+            );
+            propertyOperationTable.add(propertyOperationRowDTO);
+        }
+        return propertyOperationTable;
+    }
+
     @Override
+    @Transactional(readOnly = true)
     public List<SummaryTileDTO> getSummaryTiles(String userEmail) throws EntityNotFoundException {
         User owner = null;
         try {

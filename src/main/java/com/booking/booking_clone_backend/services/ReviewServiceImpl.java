@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +16,7 @@ public class ReviewServiceImpl implements ReviewService{
     private final ReviewRepo reviewRepo;
 
     @Override
+    @Transactional(readOnly = true)
     public ReviewSummaryDTO getPropertyReviewSummary(Long propertyId) {
         return reviewRepo.getSummaryByPropertyId(propertyId);
     }

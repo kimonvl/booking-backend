@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ public class GuestPropertyServiceImpl implements GuestPropertyService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public Page<@NonNull PropertyShortDTO> search(PropertySearchRequest request) {
         Specification<@NonNull Property> spec = Specification
                 //.where(PropertySpecification.isPublished())
@@ -77,6 +79,7 @@ public class GuestPropertyServiceImpl implements GuestPropertyService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PropertyDetailsDTO getPropertyDetails(Long propertyId) throws EntityNotFoundException {
         Property property = null;
         try {
@@ -92,6 +95,7 @@ public class GuestPropertyServiceImpl implements GuestPropertyService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isPropertyExists(Long propertyId) {
         return propertyRepo.existsById(propertyId);
     }

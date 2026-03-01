@@ -22,8 +22,8 @@ public class PropertyAvailabilityServiceImpl implements PropertyAvailabilityServ
 
     private final PropertyAvailabilityRepo propertyAvailabilityRepo;
 
-    @Transactional(propagation = Propagation.MANDATORY)
     @Override
+    @Transactional(propagation = Propagation.MANDATORY)
     public void blockDatesForBooking(Booking booking) throws EntityInvalidArgumentException {
         LocalDate checkIn = booking.getCheckInDate();
         LocalDate checkOut = booking.getCheckOutDate();
@@ -51,6 +51,7 @@ public class PropertyAvailabilityServiceImpl implements PropertyAvailabilityServ
     }
 
     @Override
+    @Transactional
     public int deleteBlocksByBookingIds(List<Long> bookingIds) {
         return propertyAvailabilityRepo.deleteByBookingIds(bookingIds);
     }
