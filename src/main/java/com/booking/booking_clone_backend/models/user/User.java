@@ -13,25 +13,25 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-// Change to uuid for equals and hashcode
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(name = "users",
         indexes = @Index(name = "idx_users_email", columnList = "email", unique = true))
 public class User extends AbstractEntity implements UserDetails {
     @Id
-    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @EqualsAndHashCode.Include
+    @Setter(AccessLevel.NONE)
+    @Column(unique = true, nullable = false, updatable = false, columnDefinition = "uuid")
+    private UUID uuid = UUID.randomUUID();
 
     @Column(nullable = false, unique = true, length = 320)
     private String email;

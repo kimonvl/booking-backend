@@ -4,6 +4,8 @@ import com.booking.booking_clone_backend.models.AbstractEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
@@ -12,9 +14,13 @@ import lombok.*;
 public class BookingCheckoutDetails extends AbstractEntity {
 
     @Id
-    @EqualsAndHashCode.Include
     @Column(name = "booking_id")
     private long bookingId;
+
+    @EqualsAndHashCode.Include
+    @Setter(AccessLevel.NONE)
+    @Column(unique = true, nullable = false, updatable = false, columnDefinition = "uuid")
+    private UUID uuid = UUID.randomUUID();
 
     @MapsId
     @OneToOne(fetch = FetchType.LAZY, optional = false)

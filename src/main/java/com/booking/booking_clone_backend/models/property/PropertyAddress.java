@@ -5,6 +5,8 @@ import com.booking.booking_clone_backend.models.static_data.Country;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Getter
 @Setter
@@ -19,12 +21,17 @@ import lombok.*;
                 @Index(name = "idx_property_addresses_postcode", columnList = "postCode")
         }
 )
+// TODO make address abstract so it can be used for both properties and users
 public class PropertyAddress extends AbstractEntity {
 
     @Id
-    @EqualsAndHashCode.Include
     @Column(name = "property_id")
-    private long propertyId;
+    private Long propertyId;
+
+    @EqualsAndHashCode.Include
+    @Setter(AccessLevel.NONE)
+    @Column(unique = true, nullable = false, updatable = false, columnDefinition = "uuid")
+    private UUID uuid = UUID.randomUUID();
 
     @MapsId
     @OneToOne(optional = false, fetch = FetchType.LAZY)

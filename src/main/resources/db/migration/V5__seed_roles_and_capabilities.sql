@@ -1,0 +1,64 @@
+-- Seed RBAC data
+-- Roles: GUEST, PARTNER
+-- Capabilities:
+--   GUEST: VIEW_PROPERTY, VIEW_BOOKING, CREATE_BOOKING, DELETE_BOOKING, CREATE_PAYMENT, VIEW_REVIEW, CREATE_REVIEW, EDIT_REVIEW, DELETE_REVIEW
+--   PARTNER: VIEW_PROPERTY, CREATE_PROPERTY, EDIT_PROPERTY, DELETE_PROPERTY, VIEW_BOOKING, VIEW_REVIEW, REPLY_REVIEW, VIEW_STATISTICS
+
+INSERT INTO roles (name)
+VALUES
+    ('GUEST'),
+    ('PARTNER')
+ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO capabilities (name)
+VALUES
+    ('VIEW_PROPERTY'),
+    ('CREATE_PROPERTY'),
+    ('EDIT_PROPERTY'),
+    ('DELETE_PROPERTY'),
+    ('VIEW_BOOKING'),
+    ('CREATE_BOOKING'),
+    ('DELETE_BOOKING'),
+    ('CREATE_PAYMENT'),
+    ('VIEW_REVIEW'),
+    ('CREATE_REVIEW'),
+    ('EDIT_REVIEW'),
+    ('DELETE_REVIEW'),
+    ('REPLY_REVIEW'),
+    ('VIEW_STATISTICS')
+ON CONFLICT (name) DO NOTHING;
+
+-- Map GUEST role to capabilities
+INSERT INTO roles_capabilities (role_id, capability_id)
+SELECT r.id, c.id
+FROM roles r
+JOIN capabilities c ON c.name IN (
+    'VIEW_PROPERTY',
+    'VIEW_BOOKING',
+    'CREATE_BOOKING',
+    'DELETE_BOOKING',
+    'CREATE_PAYMENT',
+    'VIEW_REVIEW',
+    'CREATE_REVIEW',
+    'EDIT_REVIEW',
+    'DELETE_REVIEW'
+)
+WHERE r.name = 'GUEST'
+ON CONFLICT (role_id, capability_id) DO NOTHING;
+
+-- Map PARTNER role to capabilities
+INSERT INTO roles_capabilities (role_id, capability_id)
+SELECT r.id, c.id
+FROM roles r
+JOIN capabilities c ON c.name IN (
+    'VIEW_PROPERTY',
+    'CREATE_PROPERTY',
+    'EDIT_PROPERTY',
+    'DELETE_PROPERTY',
+    'VIEW_BOOKING',
+    'VIEW_REVIEW',
+    'VIEW_STATISTICS',
+    'REPLY_REVIEW'
+)
+WHERE r.name = 'PARTNER'
+ON CONFLICT (role_id, capability_id) DO NOTHING;

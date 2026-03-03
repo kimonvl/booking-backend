@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -28,9 +29,13 @@ import java.time.Instant;
 public class Review extends AbstractEntity {
 
     @Id
-    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @EqualsAndHashCode.Include
+    @Setter(AccessLevel.NONE)
+    @Column(unique = true, nullable = false, updatable = false, columnDefinition = "uuid")
+    private UUID uuid = UUID.randomUUID();
 
     // Enforce: one review per booking
     @OneToOne(optional = false, fetch = FetchType.LAZY)

@@ -8,6 +8,7 @@ import lombok.*;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -25,9 +26,13 @@ import java.time.LocalDate;
 public class PropertyAvailability extends AbstractEntity {
 
     @Id
-    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @EqualsAndHashCode.Include
+    @Setter(AccessLevel.NONE)
+    @Column(unique = true, nullable = false, updatable = false, columnDefinition = "uuid")
+    private UUID uuid = UUID.randomUUID();
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "property_id", nullable = false)

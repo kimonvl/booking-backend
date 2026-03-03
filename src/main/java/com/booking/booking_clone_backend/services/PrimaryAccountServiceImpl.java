@@ -14,6 +14,7 @@ import com.booking.booking_clone_backend.repos.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,7 @@ public class PrimaryAccountServiceImpl implements PrimaryAccountService{
     private final AddressMapper addressMapper;
 
     @Override
+    @PreAuthorize("hasAuthority('VIEW_STATISTICS')")
     @Transactional(readOnly = true)
     public List<PropertyOperationRowDTO> getOperationsTable(String userEmail) throws EntityNotFoundException {
         User owner = null;
@@ -104,6 +106,7 @@ public class PrimaryAccountServiceImpl implements PrimaryAccountService{
     }
 
     @Override
+    @PreAuthorize("hasAuthority('VIEW_STATISTICS')")
     @Transactional(readOnly = true)
     public List<SummaryTileDTO> getSummaryTiles(String userEmail) throws EntityNotFoundException {
         User owner = null;

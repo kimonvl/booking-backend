@@ -14,6 +14,7 @@ import com.booking.booking_clone_backend.repos.PropertyRepo;
 import com.booking.booking_clone_backend.repos.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +35,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingCheckoutDetailsMapper bookingCheckoutDetailsMapper;
 
     @Override
+    @PreAuthorize("hasAnyAuthority('CREATE_BOOKING')")
     @Transactional(rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class})
     public Long createBooking(CreateBookingRequest request, String userEmail) throws EntityNotFoundException, EntityInvalidArgumentException {
         try {
@@ -81,6 +83,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @PreAuthorize("hasAnyAuthority('DELETE_BOOKING')")
     @Transactional(rollbackFor = {EntityNotFoundException.class})
     public void deleteBooking(Long bookingId) throws EntityNotFoundException {
         try {

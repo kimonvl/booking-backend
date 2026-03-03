@@ -24,6 +24,7 @@ import com.booking.booking_clone_backend.repos.PropertyRepo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,6 +46,7 @@ public class PartnerPropertyServiceImpl implements PartnerPropertyService {
     private final PropertyCustomMapper propertyCustomMapper;
 
     @Override
+    @PreAuthorize("hasAnyAuthority('CREATE_PROPERTY')")
     @Transactional(rollbackFor = {FileUploadException.class, EntityInvalidArgumentException.class, InternalErrorException.class})
     public void createProperty(CreatePropertyRequest request, List<MultipartFile> photos, Integer mainIndex, User user)
             throws FileUploadException, EntityInvalidArgumentException, InternalErrorException

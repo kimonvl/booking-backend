@@ -14,6 +14,7 @@ import com.stripe.param.PaymentIntentCreateParams;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ public class StripePaymentServiceImpl implements StripePaymentService{
     private final BookingRepo bookingRepo;
 
     @Override
+    @PreAuthorize("hasAuthority('CREATE_PAYMENT')")
     @Transactional(
             noRollbackFor = {InternalErrorException.class},
             rollbackFor = {EntityNotFoundException.class, EntityInvalidArgumentException.class})

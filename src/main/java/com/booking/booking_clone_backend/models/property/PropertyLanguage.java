@@ -23,7 +23,6 @@ import java.io.Serializable;
 public class PropertyLanguage extends AbstractEntity {
 
     @EmbeddedId
-    @EqualsAndHashCode.Include
     private PropertyLanguageId id;
 
     @MapsId("propertyId")

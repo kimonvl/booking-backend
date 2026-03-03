@@ -28,9 +28,13 @@ import java.util.*;
 public class Property extends AbstractEntity {
 
     @Id
-    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
+    @EqualsAndHashCode.Include
+    @Setter(AccessLevel.NONE)
+    @Column(unique = true, nullable = false, updatable = false, columnDefinition = "uuid")
+    private UUID uuid = UUID.randomUUID();
 
     // Partner that owns the property
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
