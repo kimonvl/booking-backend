@@ -2,6 +2,7 @@ package com.booking.booking_clone_backend.models.property;
 
 import com.booking.booking_clone_backend.models.AbstractEntity;
 import com.booking.booking_clone_backend.models.static_data.Amenity;
+import com.booking.booking_clone_backend.models.static_data.Language;
 import com.booking.booking_clone_backend.models.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -64,24 +65,26 @@ public class Property extends AbstractEntity {
         amenities.remove(amenity);
     }
 
+    @Setter(AccessLevel.NONE)
     @Getter(AccessLevel.PROTECTED)
-    @Setter(AccessLevel.PRIVATE)
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<PropertyLanguage> propertyLanguages = new HashSet<>();
-    public Set<PropertyLanguage> getAllPropertyLanguages() {
-        return propertyLanguages == null
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "properties_languages",
+            joinColumns = @JoinColumn(name = "property_id"),
+            inverseJoinColumns = @JoinColumn(name = "language_id")
+    )
+    private Set<Language> languages = new HashSet<>();
+    public Set<Language> getAllLanguages() {
+        return languages == null
                 ? Set.of()
-                : Collections.unmodifiableSet(propertyLanguages);
+                : Collections.unmodifiableSet(languages);
     }
-    public void addPropertyLanguage(PropertyLanguage propertyLanguage) {
-        if (propertyLanguages == null) propertyLanguages = new HashSet<>();
-        propertyLanguages.add(propertyLanguage);
-        propertyLanguage.setProperty(this);
+    public void addLanguage(Language language) {
+        if (language == null) languages = new HashSet<>();
+        languages.add(language);
     }
-    public void removePropertyLanguage(PropertyLanguage propertyLanguage) {
-        if (propertyLanguages == null) return;
-        propertyLanguages.remove(propertyLanguage);
-        propertyLanguage.setProperty(null);
+    public void removeLanguage(Language language) {
+        if (languages == null) return;
+        languages.remove(language);
     }
 
     @OneToOne(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

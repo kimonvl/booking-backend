@@ -13,7 +13,6 @@ import com.booking.booking_clone_backend.exceptions.InternalErrorException;
 import com.booking.booking_clone_backend.mappers.PropertyCustomMapper;
 import com.booking.booking_clone_backend.models.static_data.Amenity;
 import com.booking.booking_clone_backend.models.static_data.Language;
-import com.booking.booking_clone_backend.models.property.PropertyLanguage;
 import com.booking.booking_clone_backend.models.property.*;
 import com.booking.booking_clone_backend.models.static_data.Country;
 import com.booking.booking_clone_backend.models.user.User;
@@ -94,16 +93,15 @@ public class PartnerPropertyServiceImpl implements PartnerPropertyService {
 
     }
 
-    private void addLanguages(List<String> languageCodes, Property savedProperty) throws EntityInvalidArgumentException {
+    private void addLanguages(List<String> languageCodes, Property savedProperty) throws EntityInvalidArgumentException, EntityNotFoundException {
+        if (!dictionaryService.findIncorrectLanguageCodes(languageCodes).isEmpty()) {
+            throw new EntityInvalidArgumentException("CreateApartmentLanguage", "Failed to create apartment. Invalid language codes provided.");
+        }
         List<Language> languages = languageRepo.findByCodeInIgnoreCase(languageCodes);
         if (languages.isEmpty())
-            throw new EntityInvalidArgumentException("CreateApartmentLanguage", "Failed to create apartment. No valid languages provided.");
-        for (Language lang : languages) {
-            PropertyLanguage pl = new PropertyLanguage();
-            pl.setLanguage(lang);
-            pl.setId(new PropertyLanguage.PropertyLanguageId(savedProperty.getId(), lang.getId()));
-
-            savedProperty.addPropertyLanguage(pl);
+            throw new EntityNotFoundException("CreateApartmentLanguage", "Failed to create apartment. No valid amenities provided.");
+        for (Language language : languages) {
+            savedProperty.addLanguage(language);
         }
     }
 
