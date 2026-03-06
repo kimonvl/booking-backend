@@ -1,6 +1,5 @@
-package com.booking.booking_clone_backend.models.property;
+package com.booking.booking_clone_backend.models;
 
-import com.booking.booking_clone_backend.models.AbstractEntity;
 import com.booking.booking_clone_backend.models.static_data.Country;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,29 +13,23 @@ import java.util.UUID;
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(
-        name = "property_addresses",
+        name = "addresses",
         indexes = {
-                @Index(name = "idx_property_addresses_city", columnList = "city"),
-                @Index(name = "idx_property_addresses_country", columnList = "country_code"), // ✅ matches SQL
-                @Index(name = "idx_property_addresses_postcode", columnList = "postCode")
+                @Index(name = "idx_addresses_city", columnList = "city"),
+                @Index(name = "idx_addresses_country", columnList = "country_code"), // ✅ matches SQL
+                @Index(name = "idx_addresses_postcode", columnList = "postCode")
         }
 )
-// TODO make address abstract so it can be used for both properties and users
-public class PropertyAddress extends AbstractEntity {
+public class Address {
 
     @Id
-    @Column(name = "property_id")
-    private Long propertyId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @EqualsAndHashCode.Include
     @Setter(AccessLevel.NONE)
     @Column(unique = true, nullable = false, updatable = false, columnDefinition = "uuid")
     private UUID uuid = UUID.randomUUID();
-
-    @MapsId
-    @OneToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "property_id", nullable = false)
-    private Property property;
 
     // FK property_addresses.country_code -> countries.code
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

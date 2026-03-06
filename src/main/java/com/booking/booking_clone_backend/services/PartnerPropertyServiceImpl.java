@@ -10,7 +10,9 @@ import com.booking.booking_clone_backend.exceptions.EntityInvalidArgumentExcepti
 import com.booking.booking_clone_backend.exceptions.EntityNotFoundException;
 import com.booking.booking_clone_backend.exceptions.FileUploadException;
 import com.booking.booking_clone_backend.exceptions.InternalErrorException;
+import com.booking.booking_clone_backend.mappers.AddressMapper;
 import com.booking.booking_clone_backend.mappers.PropertyCustomMapper;
+import com.booking.booking_clone_backend.models.Address;
 import com.booking.booking_clone_backend.models.static_data.Amenity;
 import com.booking.booking_clone_backend.models.static_data.Language;
 import com.booking.booking_clone_backend.models.property.*;
@@ -44,6 +46,7 @@ public class PartnerPropertyServiceImpl implements PartnerPropertyService {
     private final CountryRepo countryRepo;
     private final LanguageRepo languageRepo;
     private final PropertyCustomMapper propertyCustomMapper;
+    private final AddressMapper addressMapper;
 
     @Override
     @PreAuthorize("hasAnyAuthority('CREATE_PROPERTY')")
@@ -122,19 +125,12 @@ public class PartnerPropertyServiceImpl implements PartnerPropertyService {
         Country country = countryRepo.findByCode(address.country())
                 .orElseThrow(() -> new EntityInvalidArgumentException("CreateApartmentCountry", "Failed to create apartment. Invalid country code provided: " + address.country()));
 
-        PropertyAddress pa = getPropertyAddress(address, country, savedProperty);
+        Address pa = getPropertyAddress(address, country);
         savedProperty.setAddress(pa);
     }
 
-    private static PropertyAddress getPropertyAddress(AddressDTO address, Country country, Property savedProperty) {
-        PropertyAddress pa = new PropertyAddress();
-        pa.setProperty(savedProperty);
-        pa.setCountry(country);
-        pa.setCity(address.city());
-        pa.setPostcode(address.postCode());
-        pa.setStreet(address.street());
-        pa.setStreetNumber(address.streetNumber());
-        return pa;
+    private Address getPropertyAddress(AddressDTO address, Country country) {
+        return addressMapper.toAddressEntity(address, country);
     }
 
     public static BedSummaryResult getBedSummaryResult(SleepingAreasDTO sleepingAreas) {

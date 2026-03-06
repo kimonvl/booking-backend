@@ -1,6 +1,7 @@
 package com.booking.booking_clone_backend.models.property;
 
 import com.booking.booking_clone_backend.models.AbstractEntity;
+import com.booking.booking_clone_backend.models.Address;
 import com.booking.booking_clone_backend.models.static_data.Amenity;
 import com.booking.booking_clone_backend.models.static_data.Language;
 import com.booking.booking_clone_backend.models.user.User;
@@ -87,8 +88,9 @@ public class Property extends AbstractEntity {
         languages.remove(language);
     }
 
-    @OneToOne(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private PropertyAddress address;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "address_id")
+    private Address address;
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
