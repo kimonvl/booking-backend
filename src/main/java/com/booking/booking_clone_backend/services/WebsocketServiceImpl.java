@@ -1,6 +1,6 @@
 package com.booking.booking_clone_backend.services;
 
-import com.booking.booking_clone_backend.DTOs.responses.realtime.ChatMessageEvent;
+import com.booking.booking_clone_backend.DTOs.responses.realtime.MessageDTO;
 import com.booking.booking_clone_backend.DTOs.responses.realtime.NotificationEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class RealtimePublisher {
+public class WebsocketServiceImpl implements WebsocketService {
 
     private static final String USER_MESSAGES_DESTINATION = "/queue/messages";
     private static final String USER_NOTIFICATIONS_DESTINATION = "/queue/notifications";
@@ -17,7 +17,7 @@ public class RealtimePublisher {
 
     // TODO send messageDTO
     // userDestination uses the authenticated Principal name (email in this project).
-    public void sendMessageToUser(String userEmail, ChatMessageEvent event) {
+    public void sendMessageToUser(String userEmail, MessageDTO event) {
         messagingTemplate.convertAndSendToUser(userEmail, USER_MESSAGES_DESTINATION, event);
     }
 
