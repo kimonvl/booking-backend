@@ -2,6 +2,7 @@ package com.booking.booking_clone_backend.models.property;
 
 import com.booking.booking_clone_backend.models.AbstractEntity;
 import com.booking.booking_clone_backend.models.Address;
+import com.booking.booking_clone_backend.models.Photo;
 import com.booking.booking_clone_backend.models.static_data.Amenity;
 import com.booking.booking_clone_backend.models.static_data.Language;
 import com.booking.booking_clone_backend.models.user.User;
@@ -171,24 +172,35 @@ public class Property extends AbstractEntity {
     @Column(nullable = false)
     private String bedSummary;
 
+    // keep many-to-many relationship with photos so I can have the middle table automatically, but enforce one photo -> one property via unique constraint on join table
+    // So I don't have to add property in photos and can keep Photo entity reusable for other purposes if needed.
+    @Setter(AccessLevel.NONE)
     @Getter(AccessLevel.PROTECTED)
-    @Setter(AccessLevel.PRIVATE)
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<PropertyPhoto> propertyPhotos = new ArrayList<>();
-    public List<PropertyPhoto> getAllPropertyPhotos() {
-        return propertyPhotos == null
-                ? List.of()
-                : Collections.unmodifiableList(propertyPhotos);
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "properties_photos",
+            joinColumns = @JoinColumn(name = "property_id"),
+            inverseJoinColumns = @JoinColumn(name = "photo_id"),
+            uniqueConstraints = {
+                    @UniqueConstraint(name = "uq_properties_photos_pair", columnNames = {"property_id", "photo_id"}),
+                    @UniqueConstraint(name = "uq_properties_photos_photo", columnNames = {"photo_id"}) // one photo -> one property
+            }
+    )
+    private List<Photo> photos = new ArrayList<>();
+
+    public List<Photo> getAllPhotos() {
+        return photos == null ? List.of() : Collections.unmodifiableList(photos);
     }
-    public void addPropertyPhoto(PropertyPhoto propertyPhoto) {
-        if (propertyPhotos == null) propertyPhotos = new ArrayList<>();
-        propertyPhotos.add(propertyPhoto);
-        propertyPhoto.setProperty(this);
+
+    public void addPhoto(Photo photo) {
+        if (photo == null) return;
+        if (photos == null) photos = new ArrayList<>();
+        photos.add(photo);
     }
-    public void removePropertyPhoto(PropertyPhoto propertyPhoto) {
-        if (propertyPhotos == null) return;
-        propertyPhotos.remove(propertyPhoto);
-        propertyPhoto.setProperty(null);
+
+    public void removePhoto(Photo photo) {
+        if (photos == null) return;
+        photos.remove(photo);
     }
 
     @Column(name = "main_photo_id")

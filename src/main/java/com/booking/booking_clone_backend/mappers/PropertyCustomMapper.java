@@ -6,6 +6,7 @@ import com.booking.booking_clone_backend.DTOs.responses.dictionaries.amenity.Ame
 import com.booking.booking_clone_backend.DTOs.responses.property.PropertyDetailsDTO;
 import com.booking.booking_clone_backend.DTOs.responses.property.PropertyShortDTO;
 import com.booking.booking_clone_backend.DTOs.responses.review.ReviewSummaryDTO;
+import com.booking.booking_clone_backend.models.Photo;
 import com.booking.booking_clone_backend.models.property.*;
 import com.booking.booking_clone_backend.models.user.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -100,7 +101,7 @@ public class PropertyCustomMapper {
                 property.getLivingRoomCount(),
                 property.getBedroomCount(),
                 property.getBedSummary(),
-                propertyPhotosToString(property.getAllPropertyPhotos()),
+                propertyPhotosToString(property.getAllPhotos()),
                 property.getMainPhotoUrl(),
                 reviewSummaryDTO,
 
@@ -116,10 +117,10 @@ public class PropertyCustomMapper {
         );
     }
 
-    private Set<String> propertyPhotosToString(List<PropertyPhoto> photos) {
+    private Set<String> propertyPhotosToString(List<Photo> photos) {
         Set<String> photoUrls = new HashSet<>();
-        for (PropertyPhoto pp : photos) {
-            photoUrls.add(pp.getUrl());
+        for (Photo photo : photos) {
+            photoUrls.add(photo.getUrl());
         }
         return photoUrls;
     }

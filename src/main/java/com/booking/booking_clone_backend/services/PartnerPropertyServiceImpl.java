@@ -13,6 +13,7 @@ import com.booking.booking_clone_backend.exceptions.InternalErrorException;
 import com.booking.booking_clone_backend.mappers.AddressMapper;
 import com.booking.booking_clone_backend.mappers.PropertyCustomMapper;
 import com.booking.booking_clone_backend.models.Address;
+import com.booking.booking_clone_backend.models.Photo;
 import com.booking.booking_clone_backend.models.static_data.Amenity;
 import com.booking.booking_clone_backend.models.static_data.Language;
 import com.booking.booking_clone_backend.models.property.*;
@@ -84,11 +85,11 @@ public class PartnerPropertyServiceImpl implements PartnerPropertyService {
         String folder = "booking/properties/" + savedProperty.getId();
         for (int i = 0; i < photos.size(); i++) {
             CloudinaryService.UploadResult res = cloudinaryService.uploadImage(photos.get(i), folder, "photo_" + i);
-            PropertyPhoto pp = new PropertyPhoto();
+            Photo pp = new Photo();
             pp.setUrl(res.url());
             pp.setPublicId(res.publicId());
 
-            savedProperty.addPropertyPhoto(pp);
+            savedProperty.addPhoto(pp);
             if (mainIndex == i) {
                 savedProperty.setMainPhotoUrl(res.url());
             }
