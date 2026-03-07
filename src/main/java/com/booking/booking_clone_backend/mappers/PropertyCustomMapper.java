@@ -2,11 +2,10 @@ package com.booking.booking_clone_backend.mappers;
 
 import com.booking.booking_clone_backend.DTOs.domain.BedSummaryResult;
 import com.booking.booking_clone_backend.DTOs.requests.partner.apartment.CreatePropertyRequest;
-import com.booking.booking_clone_backend.DTOs.responses.dictionaries.amenity.AmenityDTO;
 import com.booking.booking_clone_backend.DTOs.responses.property.PropertyDetailsDTO;
 import com.booking.booking_clone_backend.DTOs.responses.property.PropertyShortDTO;
 import com.booking.booking_clone_backend.DTOs.responses.review.ReviewSummaryDTO;
-import com.booking.booking_clone_backend.models.Photo;
+import com.booking.booking_clone_backend.models.attachment.PropertyAttachment;
 import com.booking.booking_clone_backend.models.property.*;
 import com.booking.booking_clone_backend.models.user.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -101,7 +100,7 @@ public class PropertyCustomMapper {
                 property.getLivingRoomCount(),
                 property.getBedroomCount(),
                 property.getBedSummary(),
-                propertyPhotosToString(property.getAllPhotos()),
+                propertyPhotosToString(property.getAllAttachments()),
                 property.getMainPhotoUrl(),
                 reviewSummaryDTO,
 
@@ -117,9 +116,10 @@ public class PropertyCustomMapper {
         );
     }
 
-    private Set<String> propertyPhotosToString(List<Photo> photos) {
+    private Set<String> propertyPhotosToString(Set<PropertyAttachment> attachments) {
         Set<String> photoUrls = new HashSet<>();
-        for (Photo photo : photos) {
+        System.out.println("Attachments size: " + attachments.size());
+        for (PropertyAttachment photo : attachments) {
             photoUrls.add(photo.getUrl());
         }
         return photoUrls;

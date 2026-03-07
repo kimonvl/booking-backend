@@ -2,7 +2,7 @@ package com.booking.booking_clone_backend.models.property;
 
 import com.booking.booking_clone_backend.models.AbstractEntity;
 import com.booking.booking_clone_backend.models.Address;
-import com.booking.booking_clone_backend.models.Photo;
+import com.booking.booking_clone_backend.models.attachment.PropertyAttachment;
 import com.booking.booking_clone_backend.models.static_data.Amenity;
 import com.booking.booking_clone_backend.models.static_data.Language;
 import com.booking.booking_clone_backend.models.user.User;
@@ -81,7 +81,7 @@ public class Property extends AbstractEntity {
                 : Collections.unmodifiableSet(languages);
     }
     public void addLanguage(Language language) {
-        if (language == null) languages = new HashSet<>();
+        if (languages == null) languages = new HashSet<>();
         languages.add(language);
     }
     public void removeLanguage(Language language) {
@@ -89,7 +89,7 @@ public class Property extends AbstractEntity {
         languages.remove(language);
     }
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "address_id")
     private Address address;
 
@@ -172,35 +172,28 @@ public class Property extends AbstractEntity {
     @Column(nullable = false)
     private String bedSummary;
 
-    // keep many-to-many relationship with photos so I can have the middle table automatically, but enforce one photo -> one property via unique constraint on join table
-    // So I don't have to add property in photos and can keep Photo entity reusable for other purposes if needed.
-    @Setter(AccessLevel.NONE)
     @Getter(AccessLevel.PROTECTED)
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-            name = "properties_photos",
-            joinColumns = @JoinColumn(name = "property_id"),
-            inverseJoinColumns = @JoinColumn(name = "photo_id"),
-            uniqueConstraints = {
-                    @UniqueConstraint(name = "uq_properties_photos_pair", columnNames = {"property_id", "photo_id"}),
-                    @UniqueConstraint(name = "uq_properties_photos_photo", columnNames = {"photo_id"}) // one photo -> one property
-            }
-    )
-    private List<Photo> photos = new ArrayList<>();
+    @Setter(AccessLevel.PRIVATE)
+    @OneToMany(mappedBy = "property", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PropertyAttachment> attachments = new HashSet<>();
 
-    public List<Photo> getAllPhotos() {
-        return photos == null ? List.of() : Collections.unmodifiableList(photos);
+    public Set<PropertyAttachment> getAllAttachments() {
+        return attachments == null ? Set.of() : Collections.unmodifiableSet(attachments);
     }
 
-    public void addPhoto(Photo photo) {
-        if (photo == null) return;
-        if (photos == null) photos = new ArrayList<>();
-        photos.add(photo);
+    public void addAttachment(PropertyAttachment attachment) {
+        if (attachment == null) return;
+        if (attachments == null) attachments = new HashSet<>();
+        attachments.add(attachment);
+        attachment.setProperty(this);
     }
 
-    public void removePhoto(Photo photo) {
-        if (photos == null) return;
-        photos.remove(photo);
+    public void removeAttachment(PropertyAttachment attachment) {
+        if (attachments == null) return;
+        attachments.remove(attachment);
+        if (attachment.getProperty() == this) {
+            attachment.setProperty(null);
+        }
     }
 
     @Column(name = "main_photo_id")
