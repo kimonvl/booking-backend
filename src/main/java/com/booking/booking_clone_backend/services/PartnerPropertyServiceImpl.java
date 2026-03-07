@@ -13,7 +13,7 @@ import com.booking.booking_clone_backend.exceptions.InternalErrorException;
 import com.booking.booking_clone_backend.mappers.AddressMapper;
 import com.booking.booking_clone_backend.mappers.PropertyCustomMapper;
 import com.booking.booking_clone_backend.models.Address;
-import com.booking.booking_clone_backend.models.Photo;
+import com.booking.booking_clone_backend.models.attachment.PropertyAttachment;
 import com.booking.booking_clone_backend.models.static_data.Amenity;
 import com.booking.booking_clone_backend.models.static_data.Language;
 import com.booking.booking_clone_backend.models.property.*;
@@ -71,7 +71,6 @@ public class PartnerPropertyServiceImpl implements PartnerPropertyService {
             addPhotos(photos, mainIndex, savedProperty);
 
             log.info("Property created successfully with id={}", savedProperty.getId());
-            propertyRepo.save(savedProperty);
         } catch (EntityInvalidArgumentException | FileUploadException | EntityNotFoundException e) {
             log.warn("Property creation failed for user with email ={}. Message={}", user.getEmail(), e.getMessage());
             throw e;
@@ -85,12 +84,12 @@ public class PartnerPropertyServiceImpl implements PartnerPropertyService {
         String folder = "booking/properties/" + savedProperty.getId();
         for (int i = 0; i < photos.size(); i++) {
             CloudinaryService.UploadResult res = cloudinaryService.uploadImage(photos.get(i), folder, "photo_" + i);
-            Photo pp = new Photo();
-            pp.setUrl(res.url());
-            pp.setPublicId(res.publicId());
-
-            savedProperty.addPhoto(pp);
+            PropertyAttachment pa = new PropertyAttachment();
+            pa.setUrl(res.url());
+            pa.setPublicId(res.publicId());
+            savedProperty.addAttachment(pa);
             if (mainIndex == i) {
+                // TODO store the id as well
                 savedProperty.setMainPhotoUrl(res.url());
             }
         }
