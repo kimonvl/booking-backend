@@ -20,6 +20,7 @@ public interface PropertyRepo extends JpaRepository<@NonNull Property, @NonNull 
     Optional<Property> findByUuid(@NonNull UUID uuid);
 
     boolean existsByUuid(UUID propertyId);
+    boolean existsByUuidAndOwner_Uuid(UUID propertyId, UUID ownerId);
 
     @EntityGraph(attributePaths = {"address", "amenities"})
     @Query("select distinct p from Property p where p.id in :ids")
