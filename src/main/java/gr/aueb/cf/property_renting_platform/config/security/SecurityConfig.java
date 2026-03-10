@@ -95,6 +95,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/bookings/create").hasAuthority(CapabilityEnum.CREATE_BOOKING.name())
                         .requestMatchers(HttpMethod.POST, "/bookings/delete/{bookingId}").hasAuthority(CapabilityEnum.DELETE_BOOKING.name())
 
+                        // Chat endpoints
+                        .requestMatchers(HttpMethod.POST, "/chats").hasAuthority(CapabilityEnum.PARTNER_CHAT.name())
+
                         // Payment endpoints
                         .requestMatchers(HttpMethod.POST, "/payments/create-intent").hasAuthority(CapabilityEnum.CREATE_PAYMENT.name())
 
