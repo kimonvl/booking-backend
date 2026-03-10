@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 
 public class PropertySpecification {
     public static Specification<@NonNull Property> isPublished() {
@@ -120,19 +121,22 @@ public class PropertySpecification {
         return (root, query, cb) -> {
             if (codes == null || codes.isEmpty()) return cb.conjunction();
 
-            // IMPORTANT: if codes has duplicates, the count comparison breaks
-            List<String> distinctCodes = codes.stream().distinct().toList();
+            List<String> distinctCodes = codes.stream()
+                    .filter(code -> code != null && !code.isBlank())
+                    .map(code -> code.trim().toUpperCase(Locale.ROOT))
+                    .distinct()
+                    .toList();
+            if (distinctCodes.isEmpty()) return cb.conjunction();
 
             var sq = query.subquery(Long.class);
             var p2 = sq.from(Property.class);
-            var pa = p2.join("propertyAmenities");
-            var a = pa.join("amenity");
+            var amenity = p2.join("amenities");
 
-            sq.select(cb.countDistinct(a.get("code")));
+            sq.select(cb.countDistinct(amenity.get("code")));
 
             sq.where(
                     cb.equal(p2.get("id"), root.get("id")),
-                    a.get("code").in(distinctCodes)
+                    cb.upper(amenity.get("code")).in(distinctCodes)
             );
 
             // property matches all selected codes if countDistinct == number of selected codes
