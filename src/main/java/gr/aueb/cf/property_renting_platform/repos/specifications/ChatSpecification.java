@@ -84,8 +84,10 @@ public class ChatSpecification {
 
             // Determine if current user has unread messages for a chat
             var hasUnreadByTimestamp = cb.or(
+
                     // Current user haven't read yet in that chat
                     cb.isNull(currentCp.get("lastReadAt")),
+
                     // Current user's last reat is before chat's last message
                     cb.greaterThan(root.get("lastMessageAt"), currentCp.get("lastReadAt"))
             );
