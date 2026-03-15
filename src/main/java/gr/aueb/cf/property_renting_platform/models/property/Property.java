@@ -50,7 +50,10 @@ public class Property extends AbstractEntity {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "properties_amenities",
             joinColumns = @JoinColumn(name = "property_id"),
-            inverseJoinColumns = @JoinColumn(name = "amenity_id")
+            inverseJoinColumns = @JoinColumn(name = "amenity_id"),
+            uniqueConstraints = {
+                    @UniqueConstraint(columnNames = {"property_id", "amenity_id"})
+            }
     )
     private Set<Amenity> amenities = new HashSet<>();
     public Set<Amenity> getAllAmenities() {
